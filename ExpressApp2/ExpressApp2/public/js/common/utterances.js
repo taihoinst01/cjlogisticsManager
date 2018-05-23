@@ -1,4 +1,6 @@
 var language;
+var contextEntityData = '';//context 화면 구성을 위한 임시변수이다.
+
 ;(function($) {
     console.log("utterance test");
     $.ajax({
@@ -55,7 +57,7 @@ $(document).ready(function(){
             entityValidation();
         }
     });
-
+    
     
 });
 
@@ -104,6 +106,11 @@ $(document).on('click', '.utterDelete', function() {
     $('input[name=tableAllChk]').parent().iCheck('uncheck');
     //의도예측 데이터 삭제
     $('select[name=predictIntent] :first-child').nextAll().remove();
+
+    $('input[name="iptUtterance"').attr("disabled", false);
+    $('#contextHtmlDiv').html('No Entity');
+    $('#contextDetailHtmlDiv').html('Please Select Entity');
+    contextEntityData = "";
 
     pagingFnc();
 
@@ -319,106 +326,6 @@ $(document).ready(function(){
     // Utterance Learn
     $('#utterLearn').click(function(){
 
-        
-
-        /*
-        var chkBoxFlag1 = false;
-        var chkBoxFlag2 = false;
-
-        $('input[name=tableCheckBox]').each(function(){
-            if($(this).parent().hasClass('checked') == true) {
-                chkBoxFlag1 = true;
-                return false;
-            }
-        });
-
-        if($('input[name=dlgBoxChk]').parent().hasClass('checked') == true) {
-            chkBoxFlag2 = true;
-        }
-        */
-        ///////////////////////////////////////////////////////////
-
-
-        /*
-        checkFlag 체크된 추천문장이 있는지 없는지
-        0 : 다이얼로그 생성 가능
-        1 : 다이얼로그 생성 불가능(체크된 추천문장중 학습이 안된 엔티티가 존재함)
-        2 : 다이얼로그 생성 불가능(체크된 추천문장이 없음)   
-        3 : 다이얼로그 생성 불가능(대화상자창에 다이얼로그가 없음)
-        */
-       /*
-        var checkFlag = 2;  
-        chkEntities = [];
-        $('input[name=tableCheckBox]').each(function() {
-            if($(this).parent().hasClass('checked') == true) {
-                
-                var $entityValue = $(this).parent().parent().next().find('input[name=entity]').val();
-
-                if($entityValue == "") {
-                    checkFlag = 1;                   
-                    return false;
-                }
-
-                checkFlag = 0;
-                chkEntities.push($entityValue);
-            }
-        })
-
-      
-        
-        if(checkFlag == 1) {
-
-            alert("다이얼로그 생성 불가능(선택된 추천문장중 학습이 안된 엔티티가 존재합니다. 학습을 시켜주세요.)");
-        } else if(checkFlag == 2) {
-
-            alert("선택한 학습 추천 문장이 없습니다. 학습 추천을 선택해주세요.");
-        } else if(checkFlag == 3) {
-  
-            alert("선택한 학습 추천 문장이 없습니다. 학습 추천을 선택해주세요.");
-        } else {
-
-            var inputEntity = $('input[name=entity]');
-            entities = new Array();
-            inputEntity.each(function(n) { 
-                entities.push(inputEntity[n].value);
-                return entities;
-            });
-            
-
-            var inputDlgId = $('input[name=dlgId]');
-            var dlgId = new Array();
-            inputDlgId.each(function(n) { 
-                dlgId.push(inputDlgId[n].value);
-                return dlgId;
-            });
-            var inputUtterArray = new Array();
-            $('#utterTableBody tr').each(function() {
-                if ( $(this).find('div').hasClass('checked') ) {
-                    inputUtterArray.push($(this).find('input[name=hiddenUtter]').val());
-                }
-                chkEntities.push($entityValue);
-            }
-        })
-        if(exit) return;
-
-        /*
-        var inputEntity = $('input[name=entity]');
-        
-        var entities = new Array();
-        inputEntity.each(function(n) { 
-            entities.push(inputEntity[n].value);
-            return entities;
-        });
-        */
-        /*
-        checkFlag 체크된 추천문장이 있는지 없는지
-        0 : 다이얼로그 생성 가능
-        1 : 다이얼로그 생성 불가능(체크된 추천문장중 학습이 안된 엔티티가 존재함)
-        2 : 다이얼로그 생성 불가능(체크된 추천문장이 없음)   
-        3 : 다이얼로그 생성 불가능(대화상자창에 다이얼로그가 없음)
-        */
-       
-
         var entitiyCheckFlag = true;  
         var entitiyCheckCount = 0;
         $('input[name=tableCheckBox]').each(function() {
@@ -443,11 +350,24 @@ $(document).ready(function(){
                     var entities = $('input[name=entity]').val();
 
                     var inputDlgId = $('input[name=dlgId]');
+                    
                     var dlgId = new Array();
-                    inputDlgId.each(function(n) { 
-                        dlgId.push(inputDlgId[n].value);
-                        return dlgId;
-                    });
+                    var contextData = new Array();
+
+                    /*
+                    * inputDlgId 에서 12||entity 양식이 아니면 기존 로직
+                    * 맞으면 context 이므로 데이터를 넣는다.
+                    */
+                    var check_array;
+                    for(var t=0; t<inputDlgId.length; t++){
+                        //alert("inputDlgId for==="+inputDlgId[t].value);
+                        check_array = inputDlgId[t].value.split('||');
+                        if(check_array[1]==""||check_array[1]==null){
+                            dlgId.push(check_array[0]);
+                        }else{
+                            contextData.push(inputDlgId[t].value);
+                        }
+                    }
 
                     var inputUtterArray = new Array();
                     $('#utterTableBody tr').each(function() {
@@ -466,7 +386,7 @@ $(document).ready(function(){
                         url: '/learning/learnUtterAjax',
                         dataType: 'json',
                         type: 'POST',
-                        data: {'entities':entities, 'dlgId':dlgId, 'luisId': luisId, 'luisIntent': luisIntent, 'utters' : inputUtterArray, 'predictIntent' : predictIntent},
+                        data: {'entities':entities, 'dlgId':dlgId, 'luisId': luisId, 'luisIntent': luisIntent, 'utters' : inputUtterArray, 'predictIntent' : predictIntent, 'contextData' : contextData},
                         beforeSend: function () {
 
                             var width = 0;
@@ -500,6 +420,11 @@ $(document).ready(function(){
 
                                 $('select[name=predictIntent] :first-child').nextAll().remove();
                                 $('.pagination').html('');
+
+                                $('#contextHtmlDiv').html('No Entity');
+                                $('#contextDetailHtmlDiv').html('Please Select Entity');
+                                contextEntityData = "";
+
                             }else{
                                 if(result['result'] == true) {
                                     alert(language.Added);
@@ -513,6 +438,11 @@ $(document).ready(function(){
 
                                     $('select[name=predictIntent] :first-child').nextAll().remove();
                                     $('.pagination').html('');
+
+                                    $('#contextHtmlDiv').html('No Entity');
+                                    $('#contextDetailHtmlDiv').html('Please Select Entity');
+                                    contextEntityData = "";
+
                                 }else{
                                     alert(language.It_failed);
                                 }
@@ -794,7 +724,8 @@ $(document).ready(function(){
             alert(language.Select_search_word_or_group);
         } else {
             $("#searchDlgResultDiv").html("");
-            searchDialog();
+
+            searchDialog(contextEntityData);
         }
 
         
@@ -1114,28 +1045,7 @@ function createDialog(){
         
     }
 
-    /*
-    if($('select[name=luisId]').val().trim() === "") {
-        alert(language.Please_reset_the_group);
-        exit = true;
     
-        return false;
-    }
-    if(exit) return;
-    var luisIntent;
-    $('#appInsertForm').find('[name=luisIntent]').each(function() {
-        if($(this).attr('disabled') == undefined) {
-            luisIntent = $(this).val();
-            return false;
-        }
-    })
-    if(luisIntent.trim() === "") {
-        alert(language.Please_reset_the_group);
-        exit = true;
-        return false;
-    }
-    if(exit) return;
-    */
    
     $('.insertForm input[name=dialogText]').each(function(index) {
         if ($(this).val().trim() === "") {
@@ -1147,18 +1057,6 @@ function createDialog(){
     
     if(exit) return;
 
-    /*
-    $('.insertForm input[name=imgUrl]').each(function(index) {
-        if ($(this).val().trim() === "") {
-            alert(language.ImageURL_must_be_entered);
-            exit = true;
-            return false;
-        }
-    });
-   */
-
-    if(exit) return;
-
     $('.insertForm input[name=mediaImgUrl]').each(function(index) {
         if ($(this).val().trim() === "") {
             alert(language.ImageURL_must_be_entered);
@@ -1168,26 +1066,6 @@ function createDialog(){
     });
 
     if(exit) return;
-
-
-    /*
-    if ($('#description').val().trim() === "" ) {
-        alert(language.Description_must_be_entered);
-        return false;
-    }
-    
-    $('.insertForm input[name=dialogTitle]').each(function(index) {
-        if ($(this).val().trim() === "") {
-            alert(language.You_must_enter_a_Dialog_Title);
-            exit = true;
-            return false;
-        }
-    });
-
-    if(exit) return;   
-    
-    
-    */
 
     for(var i = 0 ; i < idx ; i++) {
         var tmp = $("form[name=dialogLayout]").eq(i).serializeArray();
@@ -1266,9 +1144,7 @@ function createDialog(){
                 object[tmp[j].name] = tmp[j].value;
             }
         }
-
-        
-        
+      
         array[i] = JSON.stringify(object);//JSON.stringify(tmp);//tmp.substring(1, tmp.length-2);
     }
     //JSON.stringify($("form[name=appInsertForm]").serializeObject());
@@ -1284,7 +1160,8 @@ function createDialog(){
 
             var inputUttrHtml = '';
             for(var i = 0; i < data.list.length; i++) {
-                inputUttrHtml += '<input type="hidden" name="dlgId" value="' + data.list[i] + '"/>';
+                //inputUttrHtml += '<input type="hidden" name="dlgId" value="' + data.list[i] + '"/>';
+                inputUttrHtml += '<input type="hidden" name="dlgId" value="' + data.list[i] +'||'+contextEntityData+'"/>';
             }
             var largeGroup = $('#appInsertForm').find('#largeGroup')[0].value
             var middleGroup;
@@ -1310,9 +1187,16 @@ function createDialog(){
             inputUttrHtml += '<input type="hidden" name="predictIntent" value="' + predictIntent + '"/>';
 
             var createDlgClone = $('.dialogView').children().clone();
-            $('#dlgViewDiv').html('');
-            $('#dlgViewDiv').append(createDlgClone);
-            $('#dlgViewDiv').append(inputUttrHtml);
+            if(contextEntityData==''){
+                $('#dlgViewDiv').html('');
+                $('#dlgViewDiv').append(createDlgClone);
+                $('#dlgViewDiv').append(inputUttrHtml);
+            }else{
+                $('#dlgViewDiv_'+contextEntityData).html('');
+                $('#dlgViewDiv_'+contextEntityData).append(createDlgClone);
+                $('#dlgViewDiv_'+contextEntityData).append(inputUttrHtml);
+            }
+           
             $('.createDlgModalClose').click();
         }
     });
@@ -1536,6 +1420,15 @@ $(document).on('ifChecked', '.icheckbox_flat-green',function(event){
 
 */
 
+function contextDlgHowHide(it, box){
+   var vis = (box.checked) ? "block" : "none"; 
+    document.getElementById("context_content_"+it).style.display = vis;
+    if(vis=='none'){
+        $('#dlgViewDiv_'+it).html("");
+    }
+}
+
+
 function utterInput(queryText) {
     var queryTextArr = [];
     if (typeof queryText === 'string') {
@@ -1567,23 +1460,56 @@ function utterInput(queryText) {
                     var selBox = result['selBox'];
     
                     $('input[name="iptUtterance"').val('');
+                    $('input[name="iptUtterance"').attr("disabled", true);
                     var inputUttrHtml = '';
                     inputUttrHtml += '<tr><input type="hidden" name="hiddenUtter" value="' + queryText + '"/>';
                     inputUttrHtml += '<td> <input type="checkbox" name="tableCheckBox" class="flat-red"></td>';
                     inputUttrHtml += '<td class="txt_left clickUtter"><input type=hidden name="entity" value="' + result['entities'][k] + '"/>' + utter + '</td>';
                     inputUttrHtml += '<td><a href="#"><span class="fa  fa-trash utterDelete"><span class="hc">삭제</span></span></a></td></tr>';
                     inputUttrHtml += '<tr><td></td><td class="txt_left">';
-                    
+
+                    //context info add
+                    var contextHtml = '';
+                    var contextDetailHtml = '';
+
                     if(result.commonEntities[k]){
                         for(var i = 0; i < result.commonEntities[k].length ; i++){
                             var commonTmp = result.commonEntities[k];
                             inputUttrHtml += '<input type=hidden value="' + commonTmp[i].ENTITY_VALUE + '"/>' + commonTmp[i].ENTITY_VALUE + '::' + commonTmp[i].ENTITY;
+                            contextHtml += '<input type="checkbox" onClick="contextDlgHowHide(\''+ commonTmp[i].ENTITY_VALUE + '\', this)" name="context_' + commonTmp[i].ENTITY_VALUE + '" value="' + commonTmp[i].ENTITY_VALUE + '"/>' + commonTmp[i].ENTITY_VALUE;
+                            contextHtml += '<input type="hidden" value="' + commonTmp[i].ENTITY_VALUE + '" name="context_entity">';
+                            //dialogue box start
+                            contextDetailHtml +='<div id="context_content_'+ commonTmp[i].ENTITY_VALUE+'" style="display:none;">';
+                            contextDetailHtml +='<div class="box  color-palette-box"  style="height:550px">';
+                            contextDetailHtml +='<div class="box-body02">';
+                            contextDetailHtml +='<div class="box-header with-border">';
+                            contextDetailHtml +='<h3 class="box-title">' + commonTmp[i].ENTITY_VALUE+' Context Dialogue Box</h3>';
+                            contextDetailHtml +='<div class="btn_wrap03 fr" style="width:50%" >';
+                            contextDetailHtml +='<button type="button" class="btn btn_01" data-toggle="modal" data-target="#myModal1" onclick="openModalBox(\'#search_dlg\', \''+commonTmp[i].ENTITY_VALUE+'\')">검색</button>';
+                            contextDetailHtml +='<button type="button" class="btn btn-default" id="create_dlg" data-toggle="modal" data-target="#myModal2" onclick="openModalBox(\'#create_dlg\', \''+commonTmp[i].ENTITY_VALUE+'\')">새로생성</button>';
+                            contextDetailHtml +='</div>';
+                            contextDetailHtml +='</div>';
+                            contextDetailHtml +='<div class="dialog_wrap">';
+                            contextDetailHtml +='<div class="dialog_l"><input type="checkbox" name="dlgBoxChk" class="flat-red"></div>';
+                            contextDetailHtml +='<div class="dialog_r">';
+                            contextDetailHtml +='<div class="dialog_box" id="dlgViewDiv_'+commonTmp[i].ENTITY_VALUE+'"> <!-- 챗팅창 --></div>';
+                            contextDetailHtml +='</div>';
+                            contextDetailHtml +='</div>';
+                            contextDetailHtml +='</div>';
+                            contextDetailHtml +='</div>';
+                            contextDetailHtml +='</div>';
+                            contextDetailHtml +='</div>';
+                            //dialogue box END
+                           
                             if(i != commonTmp[i].length - 1 ) {
                                 inputUttrHtml += "&nbsp&nbsp";
+                                contextHtml += "&nbsp&nbsp";
                             }
+                            
                         }
                     }else{
                         inputUttrHtml += language.NoEntity;
+                        contextHtml += language.NoEntity;
                     }
                     inputUttrHtml += '</td><td></td></tr>';
              
@@ -1614,6 +1540,9 @@ function utterInput(queryText) {
                     selectDlgListAjax(entities[k]);
     
                     pagingFnc();
+
+                    $('#contextHtmlDiv').html(contextHtml);
+                    $('#contextDetailHtmlDiv').html(contextDetailHtml);
 
                     //Flat red color scheme for iCheck
                     $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
@@ -1689,8 +1618,15 @@ var mediaForm;
 var chkEntities;
 var addCarouselForm;
 var deleteInsertForm;
-function openModalBox(target){
-
+function openModalBox(target, contextEntity){
+    if(contextEntity==''){
+        contextEntityData = '';
+        $('#createIntent').html('<input type="text" name="predictIntent" id="predictIntent" class="form-control">');
+    }else{
+        contextEntityData = contextEntity;
+        $('#createIntent').html('<input type="hidden" name="predictIntent" id="predictIntent" value="">');
+    }
+    
     //carousel clone 초기값 저장
     //$insertForm = $('#commonLayout .insertForm').eq(0).clone();
     insertForm = '<div class="insertForm">';  
@@ -1763,45 +1699,7 @@ function openModalBox(target){
     //$mediaForm = $('#commonLayout .mediaLayout').eq(0).clone();
 
     if(target == "#create_dlg") {     
-    
-        /* 
-        
-            checkFlag 체크된 추천문장이 있는지 없는지
-            0 : 다이얼로그 생성 가능
-            1 : 다이얼로그 생성 불가능(체크된 추천문장중 학습이 안된 엔티티가 존재함)
-            2 : 다이얼로그 생성 불가능(체크된 추천문장이 없음)   
-        
-        var checkFlag = 2;  
-        chkEntities = [];
-        $('input[name=tableCheckBox]').each(function() {
-            if($(this).parent().hasClass('checked') == true) {
-                
-                var $entityValue = $(this).parent().parent().next().find('input[name=entity]').val();
 
-                if($entityValue == "") {
-                    checkFlag = 1;                   
-                    return false;
-                }
-
-                checkFlag = 0;
-                chkEntities.push($entityValue);
-            }
-        })
-
-        if(checkFlag == 1) {
-            $('#create_dlg').removeAttr('data-target');
-            alert("다이얼로그 생성 불가능(선택된 추천문장중 학습이 안된 엔티티가 존재합니다. 학습을 시켜주세요.)");
-        } else if(checkFlag == 2) {
-
-            $('#create_dlg').removeAttr('data-target');
-            alert("선택한 학습 추천 문장이 없습니다. 학습 추천을 선택해주세요.");
-        } else {
-            $('#create_dlg').attr('data-target', "#myModal2");
-            $(".insertForm form").append($(".textLayout").clone(true));
-            $(".insertForm form").append(deleteInsertForm);
-            $(".insertForm .textLayout").css("display","block");
-        }
-        */
         $(".insertForm form").append($(".textLayout").clone(true));
         $(".insertForm form").append(deleteInsertForm);
         $(".insertForm .textLayout").css("display","block");
@@ -1838,7 +1736,7 @@ function initMordal(objId, objName) {
 
 }
 
-function searchDialog() {
+function searchDialog(contextEntityData) {
     var formData = $("form[name=searchForm]").serialize();
     $.ajax({
         url: '/learning/searchDialog',
@@ -1885,7 +1783,7 @@ function searchDialog() {
                             inputUttrHtml += '<svg class="wc-message-callout"></svg>';
                             inputUttrHtml += '<div><div class="format-markdown"><div class="textMent">';
                             inputUttrHtml += '<p>';
-                            inputUttrHtml += '<input type="hidden" name="dlgId" value="' + tmp.dlg[j].DLG_ID + '"/>';
+                            inputUttrHtml += '<input type="hidden" name="dlgId" value="' + tmp.dlg[j].DLG_ID +'||'+contextEntityData+'"/>';
                             inputUttrHtml += '<input type="hidden" name="luisId" value="' + tmp.GroupL + '"/>';
                             inputUttrHtml += '<input type="hidden" name="luisIntent" value="' + tmp.GroupM + '"/>';
                             inputUttrHtml += '<input type="hidden" name="predictIntent" value="' + tmp.GroupM + '"/>';
@@ -2021,14 +1919,20 @@ $(document).on('ifChecked', 'input[name=searchDlgChk]', function(event) {
 })
 
 function selectDialog() {
-
+//alert("selectDialog contextEntityData===="+contextEntityData);
     var successFlagg = false;
     $("input[name=searchDlgChk]").each(function(n) {
         var chk = $(this).parent().hasClass('checked');
         if(chk == true) {
             var cloneDlg = $(this).parent().parent().next().children().clone();
-            $('#dlgViewDiv').html('');
-            $('#dlgViewDiv').append(cloneDlg);
+            if(contextEntityData==''){
+                $('#dlgViewDiv').html('');
+                $('#dlgViewDiv').append(cloneDlg);
+            }else{
+                $('#dlgViewDiv_'+contextEntityData).html('');
+                $('#dlgViewDiv_'+contextEntityData).append(cloneDlg);
+            }
+            
             $('.previous').hide();
             $('.next').show();
             $('.searchDialogClose').click();
@@ -2043,57 +1947,6 @@ function selectDialog() {
     }
 
 }
-
-/*
-function searchSaveDialog() {
-
-    
-    var entity = $('input[name=entity]').val();
-
-    var rowNum;
-    $("input[name=chksearch]").each(function(n) {
-        var chk = $("input[name=chksearch]").parent().eq(n).attr('checked');
-        if(chk == "checked") {
-            rowNum = n;
-        }
-    });
-
-    var dlgId = [];
-
-    $("input[name=chksearch]").parent().parent().eq(rowNum).next().find('input[name=searchDlgId]').each(function(n){
-        dlgId[n] = $(this).val();
-    });
-
-    $.ajax({
-        url: '/learning/learnUtterAjax',
-        dataType: 'json',
-        type: 'POST',
-        data: {'entity':entity, 'dlgId':dlgId},
-        success: function(result) {
-            alert('추가 되었습니다.');
-            $("#searchDialogCancel").click();
-        }
-    });
-    
-
-
-}
-*/
-/*
-$(document).on('click', '.carouseBtn',function(e){
-    //e.stopPropagation();
-    //e.preventDefault();
-    //var index = 0;
-    $(this).parent().parent().find('select').each(function(index) {
-        if ( $(this).css("display") === 'none') {
-            $(this).show().removeAttr('disabled');
-            $(this).parent().next().find('input').eq(index).show().removeAttr('disabled');;
-            $(this).parent().next().next().find('input').eq(index).show().removeAttr('disabled');;
-            return false;   
-        }
-    });
-});
-*/
 
 //다이얼로그생성모달 - 버튼추가
 $(document).on('click', '.carouseBtn',function(e){

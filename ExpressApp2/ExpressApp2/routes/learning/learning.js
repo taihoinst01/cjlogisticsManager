@@ -1671,113 +1671,7 @@ router.post('/selectDlgListAjax', function (req, res) {
 //다이얼로그 추가
 router.post('/insertDialog', function (req, res) {
     res.send({status:600 , message:'ing...'});
-    /*
-    var sourceType = req.body.sourceType;
-    var largeGroup = req.body.largeGroup;
-    var mediumGroup = req.body.mediumGroup;
-    var smallGroup = req.body.smallGroup;
-    var description = util.nullCheck(req.body.description, null);
-
-    var dlgType = req.body.dlgType; // 2 : text , 3 : carousel , 4 : media
-    var dialogOrderNo = req.body.dialogOrderNo;
-    var dialogText = util.nullCheck(req.body.dialogText, null);
-
-    var cardOrderNo = req.body.cardOrderNo;
-
-    var buttonName1 = util.nullCheck(req.body.buttonName1, null);
-    var buttonName2 = util.nullCheck(req.body.buttonName2, null);
-    var buttonName3 = util.nullCheck(req.body.buttonName3, null);
-    var buttonName4 = util.nullCheck(req.body.buttonName4, null);
-    var buttonContent1 = util.nullCheck(req.body.buttonContent1, null);
-    var buttonContent2 = util.nullCheck(req.body.buttonContent2, null);
-    var buttonContent3 = util.nullCheck(req.body.buttonContent3, null);
-    var buttonContent4 = util.nullCheck(req.body.buttonContent4, null);
-    var btn1Type = (buttonName1 != null)? 'imBack' : null;
-    var btn2Type = (buttonName2 != null)? 'imBack' : null;
-    var btn3Type = (buttonName3 != null)? 'imBack' : null;
-    var btn4Type = (buttonName4 != null)? 'imBack' : null;
-    var imgUrl = util.nullCheck(req.body.imgUrl, null);
-
-    (async () => {
-        try {
-
-            var selectQueryString1 = 'SELECT ISNULL(MAX(DLG_ID)+1,1) AS DLG_ID FROM TBL_DLG';
-            let pool = await sql.connect(dbConfig)
-            let result1 = await pool.request()
-                .query(selectQueryString1)
-            let rows1 = result1.recordset;
-            
-            var insertQueryString1 = 'INSERT INTO TBL_DLG(DLG_ID,DLG_NAME,DLG_DESCRIPTION,DLG_LANG,DLG_TYPE,DLG_ORDER_NO,USE_YN) VALUES ' +
-            '(@dlgId,@dialogText,@dialogText,\'KO\',@dlgType,@dialogOrderNo,\'Y\')';
-
-            let result2 = await pool.request()
-                .input('dlgId', sql.Int, rows1[0].DLG_ID)
-                .input('dialogText', sql.NVarChar, dialogText)
-                .input('dlgType', sql.NVarChar, dlgType)
-                .input('dialogOrderNo', sql.Int, dialogOrderNo)
-                .query(insertQueryString1)  
-            //let rows2 = result2.recordset;
-            
-            var selectQueryString2 = '';
-            if(dlgType == '2'){
-                selectQueryString2 = 'SELECT ISNULL(MAX(TEXT_DLG_ID)+1,1) AS TYPE_DLG_ID FROM TBL_DLG_TEXT';
-            }else if(dlgType == '3'){
-                selectQueryString2 = 'SELECT ISNULL(MAX(CARD_DLG_ID)+1,1) AS TYPE_DLG_ID FROM TBL_DLG_CARD';
-            }else if(dlgType == '4'){
-                selectQueryString2 = 'SELECT ISNULL(MAX(MEDIA_DLG_ID)+1,1) AS TYPE_DLG_ID FROM TBL_DLG_MEDIA';
-            }else{
-            }
-            
-            let result3 = await pool.request()
-                .query(selectQueryString2)
-            let rows3 = result3.recordset; //rows3[0].TYPE_DLG_ID
-
-            var insertQueryString2 = '';
-            if(dlgType == '2'){
-                insertQueryString2 = 'INSERT INTO TBL_DLG_TEXT(TEXT_DLG_ID,DLG_ID,CARD_TEXT,USE_YN) VALUES ' +
-                '(@typeDlgId,@dlgId,@dialogText,\'Y\')';
-            }else if(dlgType == '3'){
-                insertQueryString2 = 'INSERT INTO TBL_DLG_CARD(CARD_DLG_ID,DLG_ID,CARD_TEXT,IMG_URL,BTN_1_TYPE,BTN_1_TITLE,BTN_1_CONTEXT,BTN_2_TYPE,BTN_2_TITLE,BTN_2_CONTEXT,BTN_3_TYPE,BTN_3_TITLE,BTN_3_CONTEXT,BTN_4_TYPE,BTN_4_TITLE,BTN_4_CONTEXT,CARD_ORDER_NO,USE_YN) VALUES ' +
-                '(@typeDlgId,@dlgId,@dialogText,@imgUrl,@btn1Type,@buttonName1,@buttonContent1,@btn2Type,@buttonName2,@buttonContent2,@btn3Type,@buttonName3,@buttonContent3,@btn4Type,@buttonName4,@buttonContent4,@cardOrderNo,\'Y\')';
-            }else if(dlgType == '4'){
-                insertQueryString2 = 'INSERT INTO TBL_DLG_MEDIA(MEDIA_DLG_ID,DLG_ID,CARD_TEXT,MEDIA_URL,BTN_1_TYPE,BTN_1_TITLE,BTN_1_CONTEXT,BTN_2_TYPE,BTN_2_TITLE,BTN_2_CONTEXT,BTN_3_TYPE,BTN_3_TITLE,BTN_3_CONTEXT,BTN_4_TYPE,BTN_4_TITLE,BTN_4_CONTEXT,USE_YN) VALUES ' +
-                '(@typeDlgId,@dlgId,@dialogText,@imgUrl,@btn1Type,@buttonName1,@buttonContent1,@btn2Type,@buttonName2,@buttonContent2,@btn3Type,@buttonName3,@buttonContent3,@btn4Type,@buttonName4,@buttonContent4,\'Y\')';
-            }else{
-            }
-
-            let result4 = await pool.request()
-                .input('typeDlgId', sql.Int, rows3[0].TYPE_DLG_ID)
-                .input('dlgId', sql.Int, rows1[0].DLG_ID)
-                .input('dialogText', sql.NVarChar, dialogText)
-                .input('imgUrl', sql.NVarChar, imgUrl)
-                .input('btn1Type', sql.NVarChar, btn1Type)
-                .input('buttonName1', sql.NVarChar, buttonName1)
-                .input('buttonContent1', sql.NVarChar, buttonContent1)
-                .input('btn2Type', sql.NVarChar, btn2Type)
-                .input('buttonName2', sql.NVarChar, buttonName2)
-                .input('buttonContent2', sql.NVarChar, buttonContent2)
-                .input('btn3Type', sql.NVarChar, btn3Type)
-                .input('buttonName3', sql.NVarChar, buttonName3)
-                .input('buttonContent3', sql.NVarChar, buttonContent3)
-                .input('btn4Type', sql.NVarChar, btn4Type)
-                .input('buttonName4', sql.NVarChar, buttonName4)
-                .input('buttonContent4', sql.NVarChar, buttonContent4)
-                .input('cardOrderNo', sql.NVarChar, cardOrderNo)
-                .query(insertQueryString2)
-
-            res.send({status:200 , message:'insert Success', DLG_ID: rows1[0].DLG_ID, CARD_TEXT: dialogText});
-        
-        } catch (err) {
-            console.log(err);
-            res.send({status:500 , message:'insert Dialog Error'});
-        } finally {
-            sql.close();
-        }
-    })()
     
-    sql.on('error', err => {
-    })
-    */
 });
 
 router.post('/learnUtterAjax', function (req, res) {
@@ -1786,12 +1680,33 @@ router.post('/learnUtterAjax', function (req, res) {
 
     var entities = req.body.entities;
     var predictIntent = req.body.predictIntent;
-    
+
     var dlgId = [];
     dlgId = req.body['dlgId[]'];
 
-    var queryText = "INSERT INTO TBL_DLG_RELATION_LUIS(LUIS_ID,LUIS_INTENT,LUIS_ENTITIES,DLG_ID,DLG_API_DEFINE,USE_YN) "
-                  + "VALUES( @luisId, @luisIntent, @entities, @dlgId, 'D', 'Y' ); \n";
+    var contextData = [];
+    contextData = req.body['contextData[]'];
+    
+    if(contextData==undefined){
+        contextData = [];
+    }
+
+    var contextDataLength;
+    if(typeof contextData ==="string"){
+        contextDataLength = 1;
+    }else{
+        contextDataLength = contextData.length
+    }
+
+    var queryText = "";
+    if(contextDataLength==0){
+        queryText = "INSERT INTO TBL_DLG_RELATION_LUIS(LUIS_ID,LUIS_INTENT,LUIS_ENTITIES,DLG_ID,DLG_API_DEFINE,USE_YN, CONTEXTLABEL) "
+                  + "VALUES( @luisId, @luisIntent, @entities, @dlgId, 'D', 'Y', 'F' ); \n";
+    }else{
+        queryText = "INSERT INTO TBL_DLG_RELATION_LUIS(LUIS_ID,LUIS_INTENT,LUIS_ENTITIES,DLG_ID,DLG_API_DEFINE,USE_YN, CONTEXTLABEL) "
+                  + "VALUES( @luisId, @luisIntent, @entities, @dlgId, 'D', 'Y', 'T'); \n";
+    }
+
 
     var updateQueryText = "";
     var utterArry;
@@ -1824,6 +1739,14 @@ router.post('/learnUtterAjax', function (req, res) {
                       + "AND DLG_ID = @dlgID";
 
     var checkQuery = "SELECT RELATION_ID FROM TBL_DLG_RELATION_LUIS WHERE LUIS_INTENT = @luisIntent AND DLG_ID = @dlgId AND LUIS_ID = @luisId";
+
+    var contextQuery = "INSERT INTO TBL_DLG_RELATION_LUIS(LUIS_ID,LUIS_INTENT,LUIS_ENTITIES,DLG_ID,DLG_API_DEFINE,USE_YN, CONTEXTLABEL, MISSINGENTITIES) "
+                  + "VALUES( @luisId, @luisIntent, @entities, @dlgId, 'D', 'Y', 'T', @missing_entity ); \n";
+
+    var contextDefineQuery = "INSERT INTO TBL_CONTEXT_DEFINE(INTENT, ENTITIES) "
+                    + "VALUES( @contextIntent, @contextEntity ); \n";
+
+    var updateTblDlgQuery = "UPDATE TBL_DLG SET GROUPM=@luisIntent WHERE DLG_ID=@dlgId";
     
     (async () => {
         try {
@@ -1831,50 +1754,11 @@ router.post('/learnUtterAjax', function (req, res) {
             let result1;
             let result2;
             let checkResult;
-            /*
-            if(typeof dlgId == "string") {
-                result1 = await pool.request()
-                                .input('luisId', sql.NVarChar, luisId)
-                                .input('luisIntent', sql.NVarChar, luisIntent)
-                                .input('entities', sql.NVarChar, entities)
-                                .input('dlgId', sql.NVarChar, dlgId)
-                                .query(queryText);
-            } else {
-                for(var i = 0 ; i < dlgId.length; i++) {
-                    result1 = await pool.request()
-                                    .input('luisId', sql.NVarChar, luisId)
-                                    .input('luisIntent', sql.NVarChar, luisIntent)
-                                    .input('entities', sql.NVarChar, entities)
-                                    .input('dlgId', sql.NVarChar, dlgId[i])
-                                    .query(queryText);
-                }
-            }*/
-
-            /*
-            for(var i = 0 ; i < (typeof entities ==="string" ? 1:entities.length); i++) {
-
-                for(var j = 0 ; j <dlgLen; j++){
-                    if (j === dlgLen-1) {
-                        queryText += updateQueryText
-                    }
-                    result1 = await pool.request()
-                                    .input('luisId', sql.NVarChar, luisId)
-                                    .input('luisIntent', sql.NVarChar, luisIntent)
-                                    .input('entities', sql.NVarChar, (typeof entities ==="string" ? entities:entities[i]))
-                                    .input('dlgId', sql.NVarChar, (typeof dlgId ==="string" ? dlgId:dlgId[j]))
-                                    .query(queryText);
-                    
-                    result2 = await pool.request()
-                                    .input('entities', sql.NVarChar, (typeof entities ==="string" ? entities:entities[i]))
-                                    .input('dlgId', sql.NVarChar, (typeof dlgId ==="string" ? dlgId:dlgId[j]))
-                                    .query(updateTblDlg);
-                    
-                }
-            }
-            */
+            
            /*
            * 이미 학습되어서 디비에 들어간 내용을 다시 학습시키는 것을 방지함.
-           * */
+           * 
+           *   
            for(var jjj = 0 ; jjj < (typeof dlgId ==="string" ? 1:dlgId.length); jjj++){
             checkResult = await pool.request()
                 .input('luisId', sql.NVarChar, luisId)
@@ -1888,7 +1772,7 @@ router.post('/learnUtterAjax', function (req, res) {
                     //nothing
                 }
            }
-           
+         */
 
 
             for(var j = 0 ; j < (typeof dlgId ==="string" ? 1:dlgId.length); j++){
@@ -1944,38 +1828,51 @@ router.post('/learnUtterAjax', function (req, res) {
                     }
                 }
             }
-            
-            /*
-           result2 = await pool.request()
-           .input('entities', sql.NVarChar, (typeof entities ==="string" ? entities:entities[i]))
-           .input('dlgId', sql.NVarChar, (typeof dlgId ==="string" ? dlgId:dlgId[j]))
-           .query(updateTblDlg);
-
-           if(typeof dlgId == "string") {
-                queryText += updateQueryText
-                result1 = await pool.request()
-                                .input('luisId', sql.NVarChar, luisId)
-                                .input('luisIntent', sql.NVarChar, luisIntent)
-                                .input('entities', sql.NVarChar, entities)
-                                .input('dlgId', sql.NVarChar, dlgId)
-                                .query(queryText);
-            } else {
-                for(var i = 0 ; i < dlgId.length; i++) {
-
-                    if (i === dlgId.length-1) {
-                        queryText += updateQueryText
+            //context 데이터에 따라서 db insert
+            if(contextDataLength==0){
+                
+            }else{
+                var context_dlgid;
+                var context_missingEntity;
+                var context_defineEntity = "";
+                var temp_context;
+                var check_array;
+                for(var a=0; a<contextDataLength; a++){
+                    if(typeof contextData ==="string"){
+                        temp_context = contextData;
+                    }else{
+                        temp_context = contextData[a];
                     }
 
-                    result1 = await pool.request()
-                                    .input('luisId', sql.NVarChar, luisId)
-                                    .input('luisIntent', sql.NVarChar, luisIntent)
-                                    .input('entities', sql.NVarChar, entities)
-                                    .input('dlgId', sql.NVarChar, dlgId[i])
-                                    .query(queryText);
-                }
-            }
-            */
+                    check_array = temp_context.split('||');
+                    context_dlgid = check_array[0];
+                    context_missingEntity = check_array[1];
 
+                    context_defineEntity = context_defineEntity+check_array[1]+":,";
+
+                    var contextResult = await pool.request()
+                            .input('luisId', sql.NVarChar, luisId)
+                            .input('luisIntent', sql.NVarChar, luisIntent)
+                            .input('entities', sql.NVarChar, entities)
+                            .input('dlgId', sql.NVarChar, context_dlgid)
+                            .input('missing_entity', sql.NVarChar, context_missingEntity)
+                            .query(contextQuery);
+
+                    var updateTblDlgResult = await pool.request()
+                            .input('luisIntent', sql.NVarChar, luisIntent)
+                            .input('dlgId', context_dlgid)
+                            .query(updateTblDlgQuery);
+
+                }
+                context_defineEntity = context_defineEntity.slice(0,-1);
+                var contextDefineResult = await pool.request()
+                            .input('contextIntent', sql.NVarChar, luisIntent)
+                            .input('contextEntity', context_defineEntity)
+                            .query(contextDefineQuery);
+
+                
+            }
+            
             /*
             * 루이스에 선택된 intent에 utterance 를 넣는다.
             * 그 후에 train 시킨다.
@@ -2031,7 +1928,7 @@ router.post('/learnUtterAjax', function (req, res) {
                     }
                 }
             }
-
+            /*
             var publish_flag = "N";
             var predictIntent_ = predictIntent;
             var temp = predictIntent_.split("::");
@@ -2042,13 +1939,7 @@ router.post('/learnUtterAjax', function (req, res) {
             }else{
                 predictIntent_luis = temp[0];
             }
-            //새로생성인지 기존것 선택인지 구분(새로생성시에는 스코어가 없다)
-            if(predictIntent_.match(/::/)){
-
-            }else{
-                publish_flag = "Y";
-            }
-
+           
             var getIntentName = syncClient.get(HOST + '/luis/api/v2.0/apps/' + appId + '/versions/0.1/intents?take=500' , options);
             
             var createIntent = true;
@@ -2086,41 +1977,10 @@ router.post('/learnUtterAjax', function (req, res) {
                 "intentName" : predictIntent_luis,
                 "entityLabels" : []
             }]
-            /*
-            -- entity 추출하는 부분인데...
-            -- intent 등록시에 넣어야 할듯 한데 조금 아리까리 하네.
-            var entities_temp = entities.split(",");
-            for(var ii=0; ii<entities_temp.length; ii++){
-                for(var k = 0; k < getEntityName.body.length; k++) {
-                    for(var j = 0 ; j < getEntityName.body[k].children.length; j++) {
-                        //console.log("aaa==="+getEntityName.body[k].children[j].name);
-                        //console.log("bbb==="+getEntityName.body[k].name);
-                        if( getEntityName.body[k].children[j].name == entities_temp[ii] ) {
-                            addEntity=addEntity + getEntityName.body[k].name + "::" + getEntityName.body[k].children[j].name;
-
-                            var json = new Object();
-                            json.entityName = addEntity;
-                            json.startCharIndex = insertUtter.indexOf(entities_temp[ii]);
-                            json.endCharIndex = insertUtter.indexOf(entities_temp[ii]) + entities_temp[ii].length -1;
-                            options.payload[0].entityLabels.push(json);
-                        }
-                    }
-                }
-            }
-            console.log("addEntity ="+ addEntity);
-            var addEntity_temp = addEntity.split("//");
-            console.log("addEntity_temp ="+ addEntity_temp.length);
-                    */  
+           
             //console.log("insertUtter==="+insertUtter+"/////intentName==="+predictIntent_luis);
             //add luis utterance
             var addUtterance = syncClient.post(HOST + '/luis/api/v2.0/apps/' + appId + '/versions/0.1/examples' , options);
-            //var temp = JSON.stringify(addUtterance);
-            //console.log("addUtterance=="+temp);
-            //luis train
-            //var trainLuis = syncClient.post(HOST + '/luis/api/v2.0/apps/' + appId + '/versions/0.1/train' , options);
-            //var temp = JSON.stringify(trainLuis);
-            //console.log("train temp===="+temp);
-            //console.log("publish_flag===="+publish_flag);
 
             var trainOptions = {
                 headers: {
@@ -2176,28 +2036,12 @@ router.post('/learnUtterAjax', function (req, res) {
                 },1000);
           
             });
-
-
-
-            /*
-            if(publish_flag=="Y"){
-                //luis publish
-                options.payload = {
-                    "versionId" : "0.1",
-                    "isStaging" : false,
-                    "region" : "westus"
-                }
-                var publishLuis = syncClient.post(HOST + '/luis/api/v2.0/apps/' + appId + '/publish' , options);
-                var temp = JSON.stringify(publishLuis);
-                console.log("publish temp===="+temp);
-                
-            }else{
-                //nothing
-            }
             */
+           
            }else{
 
            }
+           return res.send({result:true});
         /********************************************* */
             //console.log(result1);
             //console.log(result2);
@@ -2775,7 +2619,7 @@ router.post('/addDialog',function(req,res){
                //.input('luisEntities', sql.NVarChar, (typeof luisEntities ==="string" ? luisEntities:luisEntities[j]))
                
                 if(array[i]["dlgType"] == "2") {
-                    console.log("start dlgType====2");
+                   
                     /*
                     let result3 = await pool.request()
                     .query(selectTextDlgId)

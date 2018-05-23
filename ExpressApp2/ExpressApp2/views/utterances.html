@@ -119,8 +119,8 @@
                                 <div class="box-header with-border">
                                     <h3 class="box-title"><%= __('Dialog_box') %></h3>
                                     <div class="btn_wrap03 fr" style="width:50%" >
-                                        <button type="button" class="btn btn_01" data-toggle="modal" data-target="#myModal1" onclick="openModalBox('#search_dlg')"><%= __('SEARCH') %></button>
-                                        <button type="button" class="btn btn-default" id="create_dlg" data-toggle="modal" data-target="#myModal2" onclick="openModalBox('#create_dlg')"><%= __('CREAT') %></button>
+                                        <button type="button" class="btn btn_01" data-toggle="modal" data-target="#myModal1" onclick="openModalBox('#search_dlg','')"><%= __('SEARCH') %></button>
+                                        <button type="button" class="btn btn-default" id="create_dlg" data-toggle="modal" data-target="#myModal2" onclick="openModalBox('#create_dlg','')"><%= __('CREAT') %></button>
                                     </div>                                                                  
                                 </div>
                                 <div class="dialog_wrap">
@@ -134,8 +134,32 @@
                     </div> 
                     <!-- //대화상자 -->                                   
                 </div>
-                <!--// Left col -->                       
-                    
+                <!--// Left col -->      
+                <!-- context function add start 2018.05.19 -->
+                <div class="row">
+                    <!-- context content-->
+                    <div class="col-md-12">
+                        <div class="box  color-palette-box">
+                            <div class="box-body02">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title">Context</h3>
+                                </div>
+                                <div id="contextHtmlDiv">No Entity</div>
+                            </div>
+                            <div class="box-body02">
+                                    <div class="box-header with-border">
+                                        <div class="row">
+                                            <div class="col-md-8"><h3 class="box-title">Context Dialog</h3></div>
+                                        </div>
+                                    </div>
+                                    <div id="contextDetailHtmlDiv">Please Select Entity</div>
+                                </div>
+                        </div>
+                    </div>
+                    <!-- context dialogue -->
+                   
+                </div>
+                <!-- context function add end -->
                 <!-- 추천문장 -->
                 <!--
                 <div class="box  color-palette-box">
@@ -214,6 +238,7 @@
                 </div>
                 <div class="modal-body">
                     <form name="searchForm" id="searchForm" method="post" onsubmit="return false">
+                        <input type="hidden" name="context_entity" id="context_entity">
                         <div class="form-group fl"  style="width:26%;">
                             <label><%= __('GROUP_INFORMATION') %></label>
                             <input type="text" name="serachDlg" class="form-control" placeholder=" <%= __('Please_enter') %>" spellcheck="false" autocomplete='off'>
@@ -280,39 +305,10 @@
                                         <option value="">선택</option>
                                     </select>
                                 </div> 
-                                <!--
-                                <div class="form-group col-md-6" style="padding-right:0"  >
-                                    <label>
-                                        <%= __('Middle_group') %><span class="nec_ico">*</span>                                        
-                                    </label>
-                                    <button type="button" class="btn btn-block btn-default btn-xs fr newMidBtn"><%= __('NEW') %></button>
-                                    <button type="button" class="btn btn-default btn-xs fr cancelMidBtn" style="display: none;"><%= __('CANCEL') %></button>
-                                    <select class="form-control" id="middleGroup" name="middleGroup"> 
-                                        <option value="">선택</option>
-                                    </select>
-                                    <input type="text" name="middleGroup" class="form-control" style="display: none;" disabled></input>
-                                </div> 
-                            
-                                <div class="clear-both"></div>
-                                <div class="form-group" >
-                                    <label>Intent</label>
-                                    <button type="button" class="btn btn-block btn-default btn-xs fr newIntentBtn"><%= __('NEW') %></button>
-                                    <button type="button" class="btn btn-default btn-xs fr cancelIntentBtn" style="display: none;"><%= __('CANCEL') %></button>
-                                    <select class="form-control" id="predictIntent" name="predictIntent"> 
-                                        <option value="">선택</option>
-                                    </select>
-                                    <input type="text" name="predictIntent" id="predictIntent" class="form-control" style="display: none;" disabled></input>
-                                </div>
-                                
-                                <div class="form-group col-md-6" style="padding-right:0"  >
-                                    <label>Intent<span class="nec_ico">*</span></label>
-                                    <input type="text" name="predictIntent" id="predictIntent" class="form-control"></input>
-                                </div>
-                                -->
                                 <div class="clear-both"></div>
                                 <div class="form-group">
                                     <label>Intent<span class="nec_ico">*</span>(Maximum length 50 characters)</label>
-                                    <input type="text" name="predictIntent" id="predictIntent" class="form-control"></input>
+                                    <div id="createIntent"></div>
                                 </div>
                                 <div class="clear-both"></div>
                                 <div class="form-group">
@@ -596,7 +592,8 @@
             </div>
         </div>
     </div> 
-    <!-- // 신규 대화상자 생성 -->  
+    <!-- // 신규 대화상자 생성 -->
+    
 
     <script>
     //iCheck for checkbox and radio inputs
