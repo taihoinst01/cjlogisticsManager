@@ -827,12 +827,17 @@ function searchIptDlg(page){
                     if(data.list[i].DLG_API_DEFINE == 'D'){
                         data.list[i].DLG_API_DEFINE = 'Common';
                     }
+
+                    if(data.list[i].MissingEntities == null){
+                        data.list[i].MissingEntities = '';
+                    }
                     item += '<tr>' +
                             '<td>' + data.list[i].DLG_API_DEFINE +'</td>' +
                             '<td>' + data.list[i].GroupS +'</td>' +
-                            '<td class="txt_left tex01"><a href="#"  data-toggle="modal" data-target="#myModal2"  onclick="searchDialog('+ data.list[i].DLG_ID +');return false;">' + data.list[i].DLG_DESCRIPTION + '</a></td>' +
+                            '<td class="txt_left tex01"><a href="#"  data-toggle="modal" data-target="#myModal2"  onclick="searchDialog('+ data.list[i].DLG_ID +','+ data.list[i].MissingEntities +');return false;">' + data.list[i].DLG_DESCRIPTION + '</a></td>' +
                             //'<td>' + data.list[i].LUIS_ENTITIES +'</td>' +
                             '<td>' + data.list[i].LUIS_INTENT +'</td>' +
+                            '<td>' + data.list[i].MissingEntities +'</td>' +
                             '<td><a href="#" onclick="deleteDialog('+ data.list[i].DLG_ID +');return false;"><span class="fa fa-trash"></span></a></td>' +
                             '</tr>';
                 }
@@ -1644,12 +1649,17 @@ function selectDlgByFilter(group){
                     if(data.list[i].DLG_API_DEFINE == 'D'){
                         data.list[i].DLG_API_DEFINE = 'Common';
                     }
+
+                    if(data.list[i].MissingEntities == null){
+                        data.list[i].MissingEntities = '';
+                    }
                     item += '<tr>' +
                             '<td>' + data.list[i].DLG_API_DEFINE +'</td>' +
                             '<td>' + data.list[i].GroupS +'</td>' +
-                            '<td class="txt_left tex01"><a href="#"  data-toggle="modal" data-target="#myModal2"   onclick="searchDialog('+ data.list[i].DLG_ID +');return false;">' + data.list[i].DLG_DESCRIPTION + '</a></td>' +
+                            '<td class="txt_left tex01"><a href="#"  data-toggle="modal" data-target="#myModal2"  onclick="searchDialog('+ data.list[i].DLG_ID +','+ data.list[i].MissingEntities +');return false;">' + data.list[i].DLG_DESCRIPTION + '</a></td>' +
                             //'<td>' + data.list[i].LUIS_ENTITIES +'</td>' +
                             '<td>' + data.list[i].LUIS_INTENT +'</td>' +
+                            '<td>' + data.list[i].MissingEntities +'</td>' +
                             '<td><a href="#" onclick="deleteDialog('+ data.list[i].DLG_ID +');return false;"><span class="fa fa-trash"></span></a></td>' +
                             '</tr>';
                 }
@@ -1949,17 +1959,21 @@ function selectDlgByTxt(groupType, sourceType){
             $('#dialogTbltbody').html('');
             var item = '';
             if(data.list.length > 0){
-                
                 for(var i = 0; i < data.list.length; i++){
                     if(data.list[i].DLG_API_DEFINE == 'D'){
                         data.list[i].DLG_API_DEFINE = 'Common';
                     }
+
+                    if(data.list[i].MissingEntities == null){
+                        data.list[i].MissingEntities = '';
+                    }
                     item += '<tr>' +
                             '<td>' + data.list[i].DLG_API_DEFINE +'</td>' +
                             '<td>' + data.list[i].GroupS +'</td>' +
-                            '<td class="txt_left tex01"><a href="#"  data-toggle="modal" data-target="#myModal2"  onclick="searchDialog('+ data.list[i].DLG_ID +');return false;">' + data.list[i].DLG_DESCRIPTION + '</a></td>' +
+                            '<td class="txt_left tex01"><a href="#"  data-toggle="modal" data-target="#myModal2"  onclick="searchDialog('+ data.list[i].DLG_ID +',\''+ data.list[i].MissingEntities +'\');return false;">' + data.list[i].DLG_DESCRIPTION + '</a></td>' +
                             //'<td>' + data.list[i].LUIS_ENTITIES +'</td>' +
                             '<td>' + data.list[i].LUIS_INTENT +'</td>' +
+                            '<td>' + data.list[i].MissingEntities +'</td>' +
                             '<td><a href="#" onclick="deleteDialog('+ data.list[i].DLG_ID +');return false;"><span class="fa fa-trash"></span></a></td>' +
                             '</tr>' ;
 
@@ -2332,7 +2346,7 @@ function insertDialog(){
 var botChatNum4Desc = 1; 
 //dlg 저장
 var dlgMap = new Object();
-function searchDialog(dlgID) {
+function searchDialog(dlgID, missingEntitiesData) {
 
     $insertForm = $('#commonLayout .insertForm').eq(0).clone();
     $dlgForm = $('#commonLayout .textLayout').eq(0).clone();
@@ -2451,7 +2465,7 @@ function searchDialog(dlgID) {
         url: '/learning/getDlgAjax',                //주소
         dataType: 'json',                  //데이터 형식
         type: 'POST',                      //전송 타입
-        data: {'dlgID':dlgID},      //데이터를 json 형식, 객체형식으로 전송
+        data: {'dlgID':dlgID, 'missingEntitiesData':missingEntitiesData},      //데이터를 json 형식, 객체형식으로 전송
 
         success: function(result) {          //성공했을 때 함수 인자 값으로 결과 값 나옴
             var inputUttrHtml = '';
@@ -2712,16 +2726,19 @@ function searchDialog(dlgID) {
    $iptLuisIntent.hide();
    $iptLuisIntent.attr('disabled', 'disabled');
 
-            //대화상자 수정 추가
-            $('h4#myModalLabel.modal-title').text(language.UPDATE_DIALOG_BOX);
-            $('#description').text(result['list'][0].DLG_DESCRIPTION);
-            $("#largeGroup").val(result['list'][0].GROUPL).prop("selected",true);
-            $("#middleGroup").val(result['list'][0].GROUPM).prop("selected",true);
-            
-            $("#predictIntent").val(result['list'][0].GROUPM).prop("selected",true);
-            $("#createDialog").attr('onclick','updateDialog()');
+   console.log("missingEntities==="+result['list'][0].MissingEntities);
 
-            //$(".insertForm .textLayout").css("display","block");
+    //대화상자 수정 추가
+    $('h4#myModalLabel.modal-title').text(language.UPDATE_DIALOG_BOX);
+    $('#description').text(result['list'][0].DLG_DESCRIPTION);
+    $("#largeGroup").val(result['list'][0].GROUPL).prop("selected",true);
+    $("#middleGroup").val(result['list'][0].GROUPM).prop("selected",true);
+    
+    $("#predictIntent").val(result['list'][0].GROUPM).prop("selected",true);
+    $('#missingEntities').text(result['list'][0].MissingEntities);
+    $("#createDialog").attr('onclick','updateDialog()');
+
+    //$(".insertForm .textLayout").css("display","block");
 
         } 
         

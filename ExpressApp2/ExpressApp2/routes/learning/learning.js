@@ -504,7 +504,7 @@ router.post('/searchIptDlg', function (req, res) {
                                      "      a.DLG_ID AS DLG_ID, " +
                                      "      COUNT('1') OVER(PARTITION BY '1') AS TOTCNT, "  +
                                      "      CEILING((ROW_NUMBER() OVER(ORDER BY LUIS_ENTITIES DESC))/ convert(numeric ,10)) PAGEIDX, " +
-                                     "      DLG_DESCRIPTION, DLG_API_DEFINE ,LUIS_ENTITIES, LUIS_INTENT, GroupS " +
+                                     "      DLG_DESCRIPTION, DLG_API_DEFINE ,LUIS_ENTITIES, LUIS_INTENT, GroupS, MissingEntities " +
                                      "  FROM TBL_DLG a, TBL_DLG_RELATION_LUIS b where a.DLG_ID = b.DLG_ID ";
                   
                 dlg_desQueryString+= "  and LUIS_ENTITIES like '%" + searchText + "%' ";
@@ -523,6 +523,7 @@ router.post('/searchIptDlg', function (req, res) {
                 var luisentent = rows[i].LUIS_INTENT;
                 var smallGroup = rows[i].GroupS;
                 var dialogueId = rows[i].DLG_ID;
+                var missingEntities = rows[i].MissingEntities;
                 
                 item.DLG_ID = dialogueId;
                 item.DLG_DESCRIPTION = description;
@@ -530,6 +531,7 @@ router.post('/searchIptDlg', function (req, res) {
                 item.LUIS_ENTITIES = luisentties;
                 item.LUIS_INTENT = luisentent;
                 item.GroupS = smallGroup;
+                item.MissingEntities = missingEntities;
 
                 result.push(item);
             }
@@ -588,7 +590,7 @@ router.post('/dialogs2', function (req, res) {
                                      "  a.DLG_ID AS DLG_ID, \n" +
                                      "  COUNT('1') OVER(PARTITION BY '1') AS TOTCNT, \n"  +
                                      "  CEILING((ROW_NUMBER() OVER(ORDER BY LUIS_ENTITIES DESC))/ convert(numeric ,10)) PAGEIDX, \n" +
-                                     "  DLG_DESCRIPTION, DLG_API_DEFINE ,LUIS_ENTITIES, LUIS_INTENT, GroupL, GroupM, GroupS \n" +
+                                     "  DLG_DESCRIPTION, DLG_API_DEFINE ,LUIS_ENTITIES, LUIS_INTENT, GroupL, GroupM, GroupS, MissingEntities \n" +
                                      "  from TBL_DLG a, TBL_DLG_RELATION_LUIS b where a.DLG_ID = b.DLG_ID \n";
                     if (req.body.searchText && !req.body.upperGroupL) {
                         dlg_desQueryString += "AND b.LUIS_ENTITIES like '%" + req.body.searchText + "%' \n";
@@ -635,6 +637,7 @@ router.post('/dialogs2', function (req, res) {
                 var luisentent = rows[i].LUIS_INTENT;
                 var smallGroup = rows[i].GroupS;
                 var dialogueId = rows[i].DLG_ID;
+                var missingEntities = rows[i].MissingEntities;
                 
                 item.DLG_ID = dialogueId;
                 item.DLG_DESCRIPTION = description;
@@ -642,6 +645,7 @@ router.post('/dialogs2', function (req, res) {
                 item.LUIS_ENTITIES = luisentties;
                 item.LUIS_INTENT = luisentent;
                 item.GroupS = smallGroup;
+                item.MissingEntities = missingEntities;
 
                 result.push(item);
             }
@@ -690,7 +694,7 @@ router.post('/dialogs', function (req, res) {
                                      "      a.DLG_ID AS DLG_ID, \n" +
                                      "COUNT('1') OVER(PARTITION BY '1') AS TOTCNT, \n"  +
                                      "CEILING((ROW_NUMBER() OVER(ORDER BY LUIS_ENTITIES DESC))/ convert(numeric ,10)) PAGEIDX, \n" +
-                                     "DLG_DESCRIPTION, DLG_API_DEFINE ,LUIS_ENTITIES, LUIS_INTENT, GroupL, GroupM, GroupS \n" +
+                                     "DLG_DESCRIPTION, DLG_API_DEFINE ,LUIS_ENTITIES, LUIS_INTENT, GroupL, GroupM, GroupS, MissingEntities \n" +
                                      "FROM TBL_DLG a, TBL_DLG_RELATION_LUIS b \n" + 
                                      "WHERE a.DLG_ID = b.DLG_ID \n";
             if (req.body.searchTxt !== '') {
@@ -729,6 +733,7 @@ router.post('/dialogs', function (req, res) {
                 var luisentent = rows[i].LUIS_INTENT;
                 var smallGroup = rows[i].GroupS;
                 var dialogueId = rows[i].DLG_ID;
+                var missingEntities = rows[i].MissingEntities;
 
                 item.DLG_ID = dialogueId;
                 item.DLG_DESCRIPTION = description;
@@ -736,6 +741,7 @@ router.post('/dialogs', function (req, res) {
                 item.LUIS_ENTITIES = luisentties;
                 item.LUIS_INTENT = luisentent;
                 item.GroupS = smallGroup;
+                item.MissingEntities = missingEntities;
 
                 result.push(item);
             }
@@ -2823,8 +2829,24 @@ router.post('/getDlgAjax', function (req, res) {
 
     var entity = [];
     var dlgID = req.body.dlgID;
+    var missingEntitiesData = req.body.missingEntitiesData;
+
+    if(missingEntitiesData==""||missingEntitiesData==null){
+        missingEntitiesData = "No Missing Entity";
+    }
+    /*
+    var selectDlgType = " SELECT a.DLG_TYPE \n" +
+                        " , a.DLG_DESCRIPTION , a.GROUPL , a.GROUPM, a.GROUPS \n" +
+                        " , b.ContextLabel , b.MissingEntities \n" +
+                        " FROM TBL_DLG a, TBL_DLG_RELATION_LUIS b \n" +
+                        " WHERE a.DLG_ID=" + dlgID + " \n" +
+                        " AND a.DLG_ID = b.DLG_ID \n" +
+                        " AND a.GROUPM = b.LUIS_INTENT \n" +
+                        " AND a.GROUPS = b.LUIS_ENTITIES \n";
+                        */
+
     var selectDlgType = " SELECT DLG_TYPE \n" +
-                        " , DLG_DESCRIPTION , GROUPL , GROUPM, GROUPS\n" +
+                        " , DLG_DESCRIPTION , GROUPL , GROUPM, GROUPS, '' as MissingEntities \n" +
                         " FROM TBL_DLG \n" +
                         " WHERE DLG_ID=" + dlgID + " \n";
 
@@ -2900,6 +2922,7 @@ router.post('/getDlgAjax', function (req, res) {
                 row.GROUPM = rows[i].GROUPM;
                 row.GROUPS = rows[i].GROUPS;
                 row.DLG_ID = dlgID;
+                row.MissingEntities = missingEntitiesData;
                 row.dlg = [];
 
                 let dlg_type = rows[i].DLG_TYPE;
