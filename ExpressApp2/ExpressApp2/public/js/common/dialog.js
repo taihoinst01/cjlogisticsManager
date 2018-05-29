@@ -33,7 +33,7 @@ $(document).ready(function(){
     $('#iptDialog').keyup(function(e){
         if(e.keyCode == 13) {
             searchIptDlg(1);
-            selectDlgByTxt('selectDlgByTxt', 'search');
+            //selectDlgByTxt('selectDlgByTxt', 'search');
         }
     });
 
@@ -831,6 +831,8 @@ function searchIptDlg(page){
                     if(data.list[i].MissingEntities == null){
                         data.list[i].MissingEntities = '';
                     }
+
+                    console.log("intent==="+data.list[i].LUIS_INTENT);
                     item += '<tr>' +
                             '<td>' + data.list[i].DLG_API_DEFINE +'</td>' +
                             '<td>' + data.list[i].GroupS +'</td>' +
@@ -872,7 +874,7 @@ function searchIptDlg(page){
                 }
             } else {
                 item += '<tr style="height: 175px;">' +
-                            '<td colspan="4">' + language.NO_DATA + '</td>' +
+                            '<td colspan="5">' + language.NO_DATA + '</td>' +
                         '</tr>';
             }
   
@@ -1664,8 +1666,6 @@ function selectDlgByFilter(group){
                             '</tr>';
                 }
 
-                
-                
                 if (searchGroupL !== '') {
                     if (!$('#selBoxBody').find('label[for=' + searchGroupL + ']').parent().hasClass('active')) {
                         $('#selBoxBody').find('label[for=' + searchGroupL + ']').next().trigger('click');
@@ -1675,7 +1675,7 @@ function selectDlgByFilter(group){
 
             } else {
                 item += '<tr style="height: 175px;">' +
-                            '<td colspan="4">' + language.NO_DATA + '</td>' +
+                            '<td colspan="5">' + language.NO_DATA + '</td>' +
                         '</tr>';
             }
         
@@ -2000,7 +2000,7 @@ function selectDlgByTxt(groupType, sourceType){
                 }
             } else {
                 item += '<tr style="height: 175px;">' +
-                            '<td colspan="4">' + language.NO_DATA + '</td>' +
+                            '<td colspan="5">' + language.NO_DATA + '</td>' +
                         '</tr>';
             }
         

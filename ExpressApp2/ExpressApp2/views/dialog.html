@@ -53,16 +53,18 @@
             <section class="content">
                     <div class="box  color-palette-box">
                             <div class="box-body">
-                            
                                   <div class="modal-body search_op">
-                                        <div class="form-group col-lg-2"  style=" padding-left:0px !important" >
-                                            <input type="text" name="iptDialog" id="iptDialog" class="form-control" placeholder=" <%= __('Enter_Connection_utterance') %>">
-                                        </div>             
+                                      <input type="hidden" id="sourceType2" name="sourceType" value="D">
+                                        <div class="form-group col-lg-4"  style=" padding-left:0px !important" >
+                                            <input type="text" name="iptDialog" id="iptDialog" class="form-control" placeholder=" <%= __('Enter_Connection_intent') %>">
+                                        </div>       
+                                        <!--      
                                         <div class="form-group col-lg-2" >
                                             <select id="sourceType2" name="sourceType" class="form-control"> 
                                                 <option value="D" selected="selected">Common</option>
                                             </select>
-                                        </div> 
+                                        </div>
+                                    --> 
                                         <div class="form-group col-lg-2"  >
                                             <select id="searchGroupL" name="searchGroupL" class="form-control searchGroup"> 
                                                 <option value=""><%= __('Large_group') %></option>     
@@ -90,10 +92,10 @@
                                                                
                                         <div class="form-group col-lg-2 fr"  style=" margin-top:20px;text-align:right; padding-right:0px;">
                                             <button type="button" id="searchDlgBtn" class="btn btn_01 "><%= __('SEARCH') %></button> 
-                                            <button type="button" id="dialog" class="btn btn-default"  data-toggle="modal" data-target="#myModal2" onclick="openModalBox('#create_dlg')"><%= __('CREATE') %></button>
+                                            <!--<button type="button" id="dialog" class="btn btn-default"  data-toggle="modal" data-target="#myModal2" onclick="openModalBox('#create_dlg')"><%= __('CREATE') %></button>-->
                                         </div>
-                                     </div>                                         
-                            
+                                     </div>
+                                     
 
                                     <!-- 학습 추천 테이블 --> 
                                     <div class="Tbl_wrap">

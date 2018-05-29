@@ -92,6 +92,7 @@
 	"Search_Dialogue": "Search Dialogue",
 	"============= Learning > DIALOG =============": "",
 	"Enter_Connection_utterance": "Enter Connection utterance",
+	"Enter_Connection_intent": "Enter Connection intent",
 	"explanation": "EXPLANATION",
 	"CONNECTION_UTTERANCE": "CONNECTION INTENT",
 	"PREVIEW_DLG": "PREVIEW DIALOG",

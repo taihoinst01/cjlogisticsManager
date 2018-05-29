@@ -507,8 +507,10 @@ router.post('/searchIptDlg', function (req, res) {
                                      "      DLG_DESCRIPTION, DLG_API_DEFINE ,LUIS_ENTITIES, LUIS_INTENT, GroupS, MissingEntities " +
                                      "  FROM TBL_DLG a, TBL_DLG_RELATION_LUIS b where a.DLG_ID = b.DLG_ID ";
                   
-                dlg_desQueryString+= "  and LUIS_ENTITIES like '%" + searchText + "%' ";
+                //dlg_desQueryString+= "  and LUIS_ENTITIES like '%" + searchText + "%' ";
+                dlg_desQueryString+= "  and LUIS_INTENT like '%" + searchText + "%' ";
                 dlg_desQueryString += ") tbp WHERE PAGEIDX = @currentPage";
+
             let pool = await dbConnect.getAppConnection(sql, req.session.appName, req.session.dbValue);//dbConnect.getConnection(sql);
             let result1 = await pool.request().input('currentPage', sql.Int, currentPage).query(dlg_desQueryString);
             let rows = result1.recordset;
@@ -538,7 +540,8 @@ router.post('/searchIptDlg', function (req, res) {
             var group_query = "SELECT DISTINCT tbp.GroupL " +
                              "   FROM (SELECT a.GroupL, a.GroupM, GroupS " +
                              "           FROM TBL_DLG a, TBL_DLG_RELATION_LUIS b " +
-                             "          WHERE a.DLG_ID = b.DLG_ID   and LUIS_ENTITIES like '%" + searchText +  "%' ) tbp " +
+                             //"          WHERE a.DLG_ID = b.DLG_ID   and LUIS_ENTITIES like '%" + searchText +  "%' ) tbp " +
+                             "          WHERE a.DLG_ID = b.DLG_ID   and LUIS_INTENT like '%" + searchText +  "%' ) tbp " +
                              "  WHERE GroupL is not null";
             //var group_query = "select distinct GroupL from TBL_DLG where GroupL is not null";
             let result2 = await pool.request().query(group_query);
@@ -593,7 +596,8 @@ router.post('/dialogs2', function (req, res) {
                                      "  DLG_DESCRIPTION, DLG_API_DEFINE ,LUIS_ENTITIES, LUIS_INTENT, GroupL, GroupM, GroupS, MissingEntities \n" +
                                      "  from TBL_DLG a, TBL_DLG_RELATION_LUIS b where a.DLG_ID = b.DLG_ID \n";
                     if (req.body.searchText && !req.body.upperGroupL) {
-                        dlg_desQueryString += "AND b.LUIS_ENTITIES like '%" + req.body.searchText + "%' \n";
+                        //dlg_desQueryString += "AND b.LUIS_ENTITIES like '%" + req.body.searchText + "%' \n";
+                        dlg_desQueryString += "AND b.LUIS_INTENT like '%" + req.body.searchText + "%' \n";
                     }
                     dlg_desQueryString += "and DLG_API_DEFINE like '%" + sourceType2 + "%' \n";
                     
@@ -622,6 +626,7 @@ router.post('/dialogs2', function (req, res) {
 
                 dlg_desQueryString += ") tbp WHERE PAGEIDX = @currentPage \n";
 
+                console.log("dlg_desQueryString==="+dlg_desQueryString);
                 
             let pool = await dbConnect.getAppConnection(sql, req.session.appName, req.session.dbValue);
             let result1 = await pool.request().input('currentPage', sql.Int, currentPage).query(dlg_desQueryString);
@@ -698,7 +703,8 @@ router.post('/dialogs', function (req, res) {
                                      "FROM TBL_DLG a, TBL_DLG_RELATION_LUIS b \n" + 
                                      "WHERE a.DLG_ID = b.DLG_ID \n";
             if (req.body.searchTxt !== '') {
-                dlg_desQueryString += "AND b.LUIS_ENTITIES like '%" + req.body.searchTxt + "%' \n";
+                //dlg_desQueryString += "AND b.LUIS_ENTITIES like '%" + req.body.searchTxt + "%' \n";
+                dlg_desQueryString += "AND b.LUIS_INTENT like '%" + req.body.searchTxt + "%' \n";
             }
             if (req.body.searchGroupL !== '') {
                 dlg_desQueryString += "AND a.GroupL = '" + req.body.searchGroupL + "' \n";
@@ -709,7 +715,7 @@ router.post('/dialogs', function (req, res) {
             if (req.body.searchGroupS !== '') {
                 dlg_desQueryString += "AND a.GroupS = '" + req.body.searchGroupS + "' \n";
             }
-        
+        console.log("dialogs dlg_desQueryString==="+dlg_desQueryString);
                                      
 /*
             if (groupType != 'View all') {
@@ -748,7 +754,8 @@ router.post('/dialogs', function (req, res) {
             var group_query = "SELECT DISTINCT tbp.GroupL " +
                             "   FROM (SELECT a.GroupL, a.GroupM, GroupS " +
                             "           FROM TBL_DLG a, TBL_DLG_RELATION_LUIS b " +
-                            "          WHERE a.DLG_ID = b.DLG_ID   and LUIS_ENTITIES like '%" + searchTxt +  "%' ) tbp " +
+                            //"          WHERE a.DLG_ID = b.DLG_ID   and LUIS_ENTITIES like '%" + searchTxt +  "%' ) tbp " +
+                            "          WHERE a.DLG_ID = b.DLG_ID   and LUIS_INTENT like '%" + searchTxt +  "%' ) tbp " +
                             "  WHERE GroupL is not null";
             //var group_query = "select distinct GroupL from TBL_DLG where GroupL is not null";
             let result2 = await pool.request().query(group_query);
@@ -3493,7 +3500,7 @@ router.post('/predictIntentAjax', function (req, res) {
     var selectAppIdQuery = "SELECT CHATBOT_ID, APP_ID, VERSION, APP_NAME,CULTURE, SUBSC_KEY \n";
     selectAppIdQuery += "FROM TBL_LUIS_APP \n";
     selectAppIdQuery += "WHERE CHATBOT_ID = (SELECT CHATBOT_NUM FROM TBL_CHATBOT_APP WHERE CHATBOT_NAME='"+req.session.appName+"')\n";
-    console.log("selectAppIdQuery=="+selectAppIdQuery);
+    //console.log("selectAppIdQuery=="+selectAppIdQuery);
 
     (async () => {
         try {
