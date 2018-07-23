@@ -3077,6 +3077,7 @@ router.post('/deleteContextDialog', function (req, res) {
     var intent = req.body.luisIntent;
 
     var selDlgQuery = "SELECT DLG_ID, DLG_TYPE, GROUPS FROM TBL_DLG WHERE DLG_ID = @dlgId";
+    var selContextDlgQuery = "SELECT DLG_ID, LUIS_ENTITIES FROM TBL_DLG_RELATION_LUIS WHERE LUIS_INTENT = @luisIntent AND ContextLabel='T'";
 
     var delDlgQuery = "DELETE FROM TBL_DLG WHERE DLG_ID = @dlgId";
     var delDlgTextQuery = "DELETE FROM TBL_DLG_TEXT WHERE DLG_ID = @dlgId";
@@ -3084,7 +3085,7 @@ router.post('/deleteContextDialog', function (req, res) {
     var delDlgMediaQuery = "DELETE FROM TBL_DLG_MEDIA WHERE DLG_ID = @dlgId";
 
     //var delRelationQuery = "DELETE FROM TBL_DLG_RELATION_LUIS WHERE DLG_ID = @dlgId";
-    var delRelationQuery = "DELETE FROM TBL_DLG_RELATION_LUIS WHERE LUIS_INTENT = @intent AND CONTEXTLABEL = 'T'";
+    var delRelationQuery = "DELETE FROM TBL_DLG_RELATION_LUIS WHERE LUIS_INTENT = @luisIntent AND CONTEXTLABEL = 'T'";
 
     var selDlgGroupSQuery = "SELECT DLG_ID FROM TBL_DLG WHERE GROUPS = @groupS ORDER BY DLG_ORDER_NO";
 
@@ -3100,6 +3101,10 @@ router.post('/deleteContextDialog', function (req, res) {
                 .input('dlgId', sql.Int, dlgId)
                 .query(selDlgQuery);
 
+            let selContext = await pool.request()
+                .input('luisIntent', sql.NVarChar, intent)
+                .query(selContextDlgQuery);
+
             let selDlgGroupS = await pool.request()
                 .input('groupS', sql.NVarChar, selDlg.recordset[0].GROUPS)
                 .query(selDlgGroupSQuery);
@@ -3108,26 +3113,35 @@ router.post('/deleteContextDialog', function (req, res) {
                 order.push(selDlgGroupS.recordset[i].DLG_ID);
             }
 
-            if (selDlg.recordset[0].DLG_TYPE == 2) {
-                let delDlgText = await pool.request()
-                    .input('dlgId', sql.Int, dlgId)
-                    .query(delDlgTextQuery);
-            } else if (selDlg.recordset[0].DLG_TYPE == 3) {
-                let delDlgCard = await pool.request()
-                    .input('dlgId', sql.Int, dlgId)
-                    .query(delDlgCardQuery);
-            } else if (selDlg.recordset[0].DLG_TYPE == 4) {
-                let delDlgMedia = await pool.request()
-                    .input('dlgId', sql.Int, dlgId)
-                    .query(delDlgMediaQuery);
+            for (var i = 0; i < selContext.recordset.length; i++) {
+                console.log("del dlg===" + selContext.recordset[i].DLG_ID);
+
+                let selDlg = await pool.request()
+                    .input('dlgId', sql.Int, selContext.recordset[i].DLG_ID)
+                    .query(selDlgQuery);
+
+                if (selDlg.recordset[0].DLG_TYPE == 2) {
+                    let delDlgText = await pool.request()
+                        .input('dlgId', sql.Int, selContext.recordset[i].DLG_ID)
+                        .query(delDlgTextQuery);
+                } else if (selDlg.recordset[0].DLG_TYPE == 3) {
+                    let delDlgCard = await pool.request()
+                        .input('dlgId', sql.Int, selContext.recordset[i].DLG_ID)
+                        .query(delDlgCardQuery);
+                } else if (selDlg.recordset[0].DLG_TYPE == 4) {
+                    let delDlgMedia = await pool.request()
+                        .input('dlgId', sql.Int, selContext.recordset[i].DLG_ID)
+                        .query(delDlgMediaQuery);
+                }
+
+
+                let delDlg = await pool.request()
+                    .input('dlgId', sql.Int, selContext.recordset[i].DLG_ID)
+                    .query(delDlgQuery);
             }
 
-            let delDlg = await pool.request()
-                .input('dlgId', sql.Int, dlgId)
-                .query(delDlgQuery);
-
             let delRelation = await pool.request()
-                .input('dlgId', sql.Int, dlgId)
+                .input('luisIntent', sql.NVarChar, intent)
                 .query(delRelationQuery);
 
             for (var i = 0; i < order.length; i++) {
@@ -3145,6 +3159,8 @@ router.post('/deleteContextDialog', function (req, res) {
                     .input('order', sql.Int, orderCount++)
                     .query(updDlgOrderQuery);
             }
+
+
 
             res.send({ "res": true });
 
@@ -3692,6 +3708,7 @@ router.get('/context', function (req, res) {
 
 router.post('/ContextList', function (req, res) {
     var searchTxt = req.body.searchTxt;
+    var searchTxt = "";
     var currentPage = req.body.currentPage;
 
     (async () => {

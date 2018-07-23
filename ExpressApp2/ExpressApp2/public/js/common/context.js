@@ -1432,14 +1432,26 @@ function selectDlgByTxt(groupType, sourceType) {
                     if (data.list[i].MissingEntities == null) {
                         data.list[i].MissingEntities = '';
                     }
-                    item += '<tr>' +
+
+                    if (data.list[i].MissingEntities == null||data.list[i].MissingEntities == '') {
+                        item += '<tr>' +
                         '<td>' + data.list[i].LUIS_INTENT + '</td>' +
                         '<td>' + data.list[i].LUIS_ENTITIES + '</td>' +
                         '<td>' + data.list[i].MissingEntities + '</td>' +
                         '<td class="txt_left tex01"><a href="#"  data-toggle="modal" data-target="#myModal2"  onclick="searchDialog(' + data.list[i].DLG_ID + ',\'' + data.list[i].MissingEntities + '\');return false;">' + data.list[i].DLG_DESCRIPTION + '</a></td>' +
-                        //'<td>' + data.list[i].LUIS_ENTITIES +'</td>' +
                         '<td><a href="#" onclick="deleteContextDialog(' + data.list[i].DLG_ID + ',\'' + data.list[i].LUIS_INTENT + '\');return false;"><span class="fa fa-trash"></span></a></td>' +
                         '</tr>';
+                    }else{
+                        item += '<tr>' +
+                        '<td>' + data.list[i].LUIS_INTENT + '</td>' +
+                        '<td>' + data.list[i].LUIS_ENTITIES + '</td>' +
+                        '<td>' + data.list[i].MissingEntities + '</td>' +
+                        '<td class="txt_left tex01"><a href="#"  data-toggle="modal" data-target="#myModal2"  onclick="searchDialog(' + data.list[i].DLG_ID + ',\'' + data.list[i].MissingEntities + '\');return false;">' + data.list[i].DLG_DESCRIPTION + '</a></td>' +
+                        '<td>&nbsp;</td>'
+                        '</tr>';
+                    }
+
+                    
 
                 }
 
@@ -2240,7 +2252,7 @@ function updateDialog() {
 function deleteContextDialog(dlgId, luisIntent) {
 
     $.ajax({
-        url: '/learning/deleteDialog',                //주소
+        url: '/learning/deleteContextDialog',                //주소
         dataType: 'json',                  //데이터 형식
         type: 'POST',                      //전송 타입
         data: { 'dlgId': dlgId, 'contextYN': 'Y', 'luisIntent': luisIntent },      //데이터를 json 형식, 객체형식으로 전송
