@@ -1476,7 +1476,7 @@ function utterInput(queryText) {
                         for(var i = 0; i < result.commonEntities[k].length ; i++){
                             var commonTmp = result.commonEntities[k];
                             inputUttrHtml += '<input type=hidden value="' + commonTmp[i].ENTITY_VALUE + '"/>' + commonTmp[i].ENTITY_VALUE + '::' + commonTmp[i].ENTITY;
-                            contextHtml += '<input type="checkbox" onClick="contextDlgHowHide(\''+ commonTmp[i].ENTITY_VALUE + '\', this)" name="context_' + commonTmp[i].ENTITY_VALUE + '" value="' + commonTmp[i].ENTITY_VALUE + '"/>' + commonTmp[i].ENTITY_VALUE;
+                            contextHtml += '<input type="checkbox" class="icheckbox_flat-green" onClick="contextDlgHowHide(\''+ commonTmp[i].ENTITY_VALUE + '\', this)" name="context_' + commonTmp[i].ENTITY_VALUE + '" value="' + commonTmp[i].ENTITY_VALUE + '"/>&nbsp;' + commonTmp[i].ENTITY_VALUE;
                             contextHtml += '<input type="hidden" value="' + commonTmp[i].ENTITY_VALUE + '" name="context_entity">';
                             //dialogue box start
                             contextDetailHtml +='<div id="context_content_'+ commonTmp[i].ENTITY_VALUE+'" style="display:none;">';
@@ -1486,7 +1486,7 @@ function utterInput(queryText) {
                             contextDetailHtml +='<h3 class="box-title">' + commonTmp[i].ENTITY_VALUE+' Context Dialogue Box</h3>';
                             contextDetailHtml +='<div class="btn_wrap03 fr" style="width:50%" >';
                             contextDetailHtml +='<button type="button" class="btn btn_01" data-toggle="modal" data-target="#myModal1" onclick="openModalBox(\'#search_dlg\', \''+commonTmp[i].ENTITY_VALUE+'\')">검색</button>';
-                            contextDetailHtml +='<button type="button" class="btn btn-default" id="create_dlg" data-toggle="modal" data-target="#myModal2" onclick="openModalBox(\'#create_dlg\', \''+commonTmp[i].ENTITY_VALUE+'\')">새로생성</button>';
+                            contextDetailHtml +='&nbsp;<button type="button" class="btn btn-default" id="create_dlg" data-toggle="modal" data-target="#myModal2" onclick="openModalBox(\'#create_dlg\', \''+commonTmp[i].ENTITY_VALUE+'\')">새로생성</button>';
                             contextDetailHtml +='</div>';
                             contextDetailHtml +='</div>';
                             contextDetailHtml +='<div class="dialog_wrap">';
@@ -1511,6 +1511,8 @@ function utterInput(queryText) {
                         inputUttrHtml += language.NoEntity;
                         contextHtml += language.NoEntity;
                     }
+
+                    
                     inputUttrHtml += '</td><td></td></tr>';
              
                     /*
@@ -1575,6 +1577,7 @@ function utterHighlight(entities, utter) {
     var result = utter;
     if(entities){
         for(var i = 0; i < entities.length; i++) {
+            alert("asdfsafsd==="+entities[i].ENTITY_VALUE);
             result = result.replace(entities[i].ENTITY_VALUE, '<span class="highlight">' + entities[i].ENTITY_VALUE + '</span>');
         }
     }
