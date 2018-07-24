@@ -2347,7 +2347,7 @@ var botChatNum4Desc = 1;
 //dlg 저장
 var dlgMap = new Object();
 function searchDialog(dlgID, missingEntitiesData) {
-alert("start=====================================!!!"+missingEntitiesData);
+
     $insertForm = $('#commonLayout .insertForm').eq(0).clone();
     $dlgForm = $('#commonLayout .textLayout').eq(0).clone();
     $carouselForm = $('#commonLayout .carouselLayout').eq(0).clone();

@@ -1577,7 +1577,6 @@ function utterHighlight(entities, utter) {
     var result = utter;
     if(entities){
         for(var i = 0; i < entities.length; i++) {
-            alert("asdfsafsd==="+entities[i].ENTITY_VALUE);
             result = result.replace(entities[i].ENTITY_VALUE, '<span class="highlight">' + entities[i].ENTITY_VALUE + '</span>');
         }
     }
