@@ -790,17 +790,17 @@ router.post('/utterInputAjax', function (req, res, next) {
                     selBoxArr.push(rows2);
                     commonEntitiesArr.push(commonEntities);
                     //res.send({result:true, iptUtterance:iptUtterance, entities:entities, selBox:rows2, commonEntities: commonEntities});
-                   
+
                 } else {
                     iptUtteranceArr.push(iptUtterTmp);
                     entitiesArr.push(null);
                     selBoxArr.push(null);
                     commonEntitiesArr.push(null);
                     //res.send({result:true, iptUtterance:iptUtterance});
-                    
+
                 }
             }
-            
+
             res.send({ result: true, iptUtterance: iptUtteranceArr, entities: entitiesArr, selBox: selBoxArr, commonEntities: commonEntitiesArr });
 
         } catch (err) {
@@ -2881,8 +2881,10 @@ router.post('/deleteDialog', function (req, res) {
     var delDlgMediaQuery = "DELETE FROM TBL_DLG_MEDIA WHERE DLG_ID = @dlgId";
 
     var delRelationQuery = "";
+    var delContextDefineQuery = "";
     if (contextYN == "Y") {
         delRelationQuery = "DELETE FROM TBL_DLG_RELATION_LUIS WHERE LUIS_INTENT = @luisIntent AND CONTEXTLABEL = 'T'";
+        delContextDefineQuery = "DELETE FROM TBL_CONTEXT_DEFINE WHERE LUIS_INTENT = @luisIntent";
     } else {
         delRelationQuery = "DELETE FROM TBL_DLG_RELATION_LUIS WHERE DLG_ID = @dlgId";
     }
@@ -2931,6 +2933,9 @@ router.post('/deleteDialog', function (req, res) {
                 let delRelation = await pool.request()
                     .input('luisIntent', sql.NVarChar, luisIntent)
                     .query(delRelationQuery);
+                let delContextDefine = await pool.request()
+                    .input('luisIntent', sql.NVarChar, luisIntent)
+                    .query(delContextDefineQuery);
             } else {
                 let delRelation = await pool.request()
                     .input('dlgId', sql.Int, dlgId)
