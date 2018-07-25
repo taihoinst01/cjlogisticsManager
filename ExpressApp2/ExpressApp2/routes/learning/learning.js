@@ -250,63 +250,7 @@ router.get('/dialog', function (req, res) {
 
 });
 
-/*
-router.post('/', function (req, res) {
-    
-    
-    var currentPage = req.body.currentPage;
 
-    (async () => {
-        try {
-            var sourceType = req.body.sourceType;
-            var groupType = req.body.groupType;
-            var dlg_desQueryString = "select tbp.* from " +
-                                     "(select ROW_NUMBER() OVER(ORDER BY LUIS_ENTITIES DESC) AS NUM, " +
-                                     "COUNT('1') OVER(PARTITION BY '1') AS TOTCNT, "  +
-                                     "CEILING((ROW_NUMBER() OVER(ORDER BY LUIS_ENTITIES DESC))/ convert(numeric ,10)) PAGEIDX, " +
-                                     "DLG_DESCRIPTION, DLG_API_DEFINE ,LUIS_ENTITIES, LUIS_INTENT " +
-                                     "from TBL_DLG a, TBL_DLG_RELATION_LUIS b " + 
-                                     "where a.DLG_ID = b.DLG_ID and LUIS_INTENT like '%" + groupType + "%' " +
-                                     "and DLG_API_DEFINE like '%" + sourceType + "%') tbp " +
-                                     "WHERE PAGEIDX = @currentPage";
-            let pool = await sql.connect(dbConfig);
-            let result1 = await pool.request().input('currentPage', sql.Int, currentPage).query(dlg_desQueryString);
-            let rows = result1.recordset;
-            
-            var result = [];
-            for(var i = 0; i < rows.length; i++){
-                var item = {};
-
-                var description = rows[i].DLG_DESCRIPTION;
-                var apidefine = rows[i].DLG_API_DEFINE;
-                var luisentties = rows[i].LUIS_ENTITIES;
-                var luisentent = rows[i].LUIS_INTENT;
-
-                item.DLG_DESCRIPTION = description;
-                item.DLG_API_DEFINE = apidefine;
-                item.LUIS_ENTITIES = luisentties;
-                item.LUIS_INTENT = luisentent;
-
-                result.push(item);
-            }
-            if(rows.length > 0){
-                res.send({list : result, pageList : paging.pagination(currentPage,rows[0].TOTCNT)});
-            }else{
-                res.send({list : result});
-            }
-        } catch (err) {
-            console.log(err)
-            // ... error checks
-        } finally {
-            sql.close();
-        }
-    })()
-
-    sql.on('error', err => {
-        // ... error handler
-    })
-});
-*/
 //다이얼로그 대그룹 중그룹 소그룹 셀렉트 박스
 router.post('/searchGroup', function (req, res) {
     var searchTxt = '';
@@ -444,52 +388,6 @@ router.post('/selectSmallGroup', function (req, res) {
     })
 });
 
-/*
-//그룹 테스트
-router.post('/searchMidGroup', function (req, res) {
-    
-    
-    var groupName = req.body.groupName;
-
-    (async () => {
-        try {
-            var searchMidGroup = "select distinct GroupM from TBL_DLG where GroupL = @groupName";
-            let pool = await sql.connect(dbConfig);
-            let result1 = await pool.request().input('groupName', sql.NVarChar, groupName).query(searchMidGroup);
-            let rows = result1.recordset;
-            
-            var groupList = [];
-            for(var i = 0; i < rows.length; i++){
-                var item = {};
-
-                var mediumGroup = rows[i].GroupM;
-
-                item.mediumGroup = mediumGroup; 
-                console.log("mediumGroup:" + mediumGroup);
-
-
-                groupList.push(item);
-            }
-
-
-            if(rows.length > 0){
-                res.send({groupList: groupList});
-            }else{
-                res.send({list : groupList});
-            }
-        } catch (err) {
-            console.log(err)
-            // ... error checks
-        } finally {
-            sql.close();
-        }
-    })()
-
-    sql.on('error', err => {
-        // ... error handler
-    })
-});
-*/
 
 router.post('/searchIptDlg', function (req, res) {
 
@@ -892,18 +790,17 @@ router.post('/utterInputAjax', function (req, res, next) {
                     selBoxArr.push(rows2);
                     commonEntitiesArr.push(commonEntities);
                     //res.send({result:true, iptUtterance:iptUtterance, entities:entities, selBox:rows2, commonEntities: commonEntities});
-                    console.log("commonEntities item==insert data");
+                   
                 } else {
                     iptUtteranceArr.push(iptUtterTmp);
                     entitiesArr.push(null);
                     selBoxArr.push(null);
                     commonEntitiesArr.push(null);
                     //res.send({result:true, iptUtterance:iptUtterance});
-                    console.log("commonEntities item==insert null");
+                    
                 }
             }
-            console.log("entitiesArr===" + entitiesArr);
-            console.log("commonEntities length==" + commonEntitiesArr.length);
+            
             res.send({ result: true, iptUtterance: iptUtteranceArr, entities: entitiesArr, selBox: selBoxArr, commonEntities: commonEntitiesArr });
 
         } catch (err) {
