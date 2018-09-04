@@ -1,98 +1,101 @@
 
 //가장 먼저 실행.
 var language;
-;(function($) {
+; (function ($) {
     $.ajax({
         url: '/jsLang',
         dataType: 'json',
         type: 'POST',
-        success: function(data) {
-            language= data.lang;
+        success: function (data) {
+            language = data.lang;
         }
     });
 })(jQuery);
 
-$(document).ready(function() {
+$(document).ready(function () {
     makeUserTable();
 });
 
-$(document).ready(function() {
+$(document).ready(function () {
 
     //검색
-    $('#searchBtn').click(function() {
+    $('#searchBtn').click(function () {
         makeUserTable();
     });
 
     //엔터로 검색
-    $('#searchName, #searchId').on('keypress', function(e) {
+    $('#searchName, #searchId').on('keypress', function (e) {
         if (e.keyCode == 13) makeUserTable();
     });
 
-    //저장
-    $('#saveBtn').click(function() {
-        saveUserApp();
+    //수정폼
+    $(document).on("click", "#update_authForm", function () {
+        document.userAuthForm.reset();
+        getAuthList();
+
+        var user_id = $(this).attr("user_id");
+        var tr = $(this).parent().parent();
+        var td = tr.children();
+
+        document.userAuthForm.USER_ID.value = user_id;
+
+        $('#S_USER_ID').html(user_id);
+        $('#USER_AUTH').html(td.eq(4).text());
+
+        $('#footer_button').html('<button type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Close</button><button type="button" class="btn btn-primary" id="updateAuthBtn"><i class="fa fa-edit"></i> Update</button>');
+
+        $('#authUpdateFormModal').modal('show');
     });
 
-    //앱리스트 초기화
-    $('#initBtn').click(function() {
-        fnc_initAppList();
+    //수정 버튼
+    $(document).on("click", "#updateAuthBtn", function () {
+        updateUserAuth();
     });
-    
+
 });
 
 
 //유저 테이블 페이지 버튼 클릭
-$(document).on('click','#userTablePaging .li_paging',function(e){
-    if(!$(this).hasClass('active')){
+$(document).on('click', '#userTablePaging .li_paging', function (e) {
+    if (!$(this).hasClass('active')) {
         makeUserTable($(this).text());
     }
 });
 
-//앱 테이블 페이지 버튼 클릭
-$(document).on('click','#appTablePaging .li_paging',function(e){
-    if(!$(this).hasClass('active')){
-        makeAppTable($('#selectUserHiddenId').val(), $(this).text());
-    }
-});
 
-$(document).on('click', '#userTableBodyId tr[name=userTr]', function() {
-    $('tr[name=userTr]').css("background", '');
-    var clickUserId = $(this).children().eq(1).text();
-    $('#selectUserHiddenId').val(clickUserId);
-    makeAppTable(clickUserId);
-
-    $(this).css("background", "aliceblue");
-
-});
-
-var initAppList;
-var initAppCheck;
 function makeUserTable(newPage) {
-    
+
     var params = {
-        'searchName' : $('#searchName').val(),
-        'searchId' : $('#searchId').val(),
-        'currentPage' : newPage,
-        'rows' : $('td[dir=ltr]').find('select').val()
+        'searchName': $('#searchName').val(),
+        'searchId': $('#searchId').val(),
+        'currentPage': newPage,
+        'rows': $('td[dir=ltr]').find('select').val()
     };
-    
+
     $.ajax({
         type: 'POST',
         data: params,
-        url: '/users/selectUserList',
-        success: function(data) {
-           
+        url: '/user/selectUserList',
+        success: function (data) {
+
             if (data.rows) {
-                
+
                 var tableHtml = "";
-    
-                for (var i=0;i<data.rows.length;i++) { 
+                var s_auth_name = "";
+                for (var i = 0; i < data.rows.length; i++) {
+                    if (data.rows[i].AUTH_NM == "" || data.rows[i].AUTH_NM == null) {
+                        s_auth_name = "사용권한없음";
+                    } else {
+                        s_auth_name = data.rows[i].AUTH_NM;
+                    }
                     tableHtml += '<tr style="cursor:pointer" name="userTr"><td>' + data.rows[i].SEQ + '</td>';
                     tableHtml += '<td>' + data.rows[i].USER_ID + '</td>'
                     tableHtml += '<td>' + data.rows[i].EMP_NM + '</td>'
-                    tableHtml += '<td>' + data.rows[i].EMAIL + '</td></tr>'
+                    tableHtml += '<td>' + data.rows[i].EMAIL + '</td>'
+                    tableHtml += '<td>' + s_auth_name + '</td>'
+                    tableHtml += '<td><button type="button" class="btn btn-default btn-sm" id="update_authForm" user_id="' + data.rows[i].USER_ID + '"><i class="fa fa-edit"></i> 권한수정</button></td></tr>'
                 }
-    
+
                 saveTableHtml = tableHtml;
                 $('#userTableBodyId').html(tableHtml);
 
@@ -105,158 +108,86 @@ function makeUserTable(newPage) {
                 $('#userTableBodyId').html('');
                 $('#appTableBodyId').html('');
             }
-            
+
         }
     });
 }
 
-function makeAppTable(userId, newPage) {
-    
-    var params = {
-        'userId' : userId,
-        'currentPage' : newPage,
-        'currentPageUser' : $('#userTablePaging .active').val()
-    };
-    
+//상위 메뉴 검색
+function getAuthList() {
+    var select_menu = "";
     $.ajax({
         type: 'POST',
-        data: params,
-        url: '/users/selectUserAppList',
-        success: function(data) {
-            initAppList = data.rows;
-            initAppCheck = data.checkedApp;
-            mkAppRow(data.rows, data.checkedApp);
-            
-            $('#appTablePaging .pagination').html('').append(data.pageList);
+        url: '/user/getAuthList',
+        isloading: true,
+        success: function (data) {
+            if (data.records > 0) {
+                select_menu = "<option value=''>권한선택</option>"
+                for (var i = 0; i < data.rows.length; i++) {
+                    select_menu += '<option value="' + data.rows[i].AUTH_LEVEL + '">' + data.rows[i].AUTHGRP_M_NM + '</option>';
+                }
+            } else {
+                select_menu = "<option value=''>권한선택</option>"
+            }
+            $('#UPDATE_USER_AUTH').html(select_menu);
         }
     });
 }
 
-//appList table tbody html 생성
-function mkAppRow(rows, checkedApp) {
+function updateUserAuth() {
+    var saveArr = new Array();
+    var data = new Object();
 
-    $('#appTableBodyId').html('');
-    var appHtml ="";
+    data.USER_ID = $('#USER_ID').val();
+    data.AUTH_LEVEL = $('#UPDATE_USER_AUTH').val();
+    saveArr.push(data);
 
-    for (var i=0;i<rows.length;i++) { 
-        
-        appHtml += '<tr><td>' + Number(i+1) + '</td>';
-        
-        var j=0;
-        for (; j<checkedApp.length; j++) {
-            if (rows[i].CHATBOT_NUM === Number(checkedApp[j].APP_ID)) {
-                appHtml += '<td><input type="checkbox" class="flat-red" checked name="tableCheckBox"></td>';
-                break;
-            } 
-        }
-        if (j === checkedApp.length) {
-            appHtml += '<td><input type="checkbox" class="flat-red" name="tableCheckBox"></td>';
-        }
-
-        appHtml += '<td>' + rows[i].CHATBOT_NAME + '</td>';
-        appHtml += '<td>' + rows[i].DESCRIPTION + '</td>';
-        appHtml += '<td><input type="hidden" value="' + rows[i].CHATBOT_NUM + '" /></td></tr>';
-    }
-
-    $('#appTableBodyId').html(appHtml);
-
-    iCheckBoxTrans();
-
-}
-
-
-//초기화
-function fnc_initAppList() {
-    if(confirm(language['ASK_INIT'])) {
-        mkAppRow(initAppList, initAppCheck);
-    }
-}
-
-//저장
-function saveUserApp() {
-
-    if (confirm(language['ASK_SAVE'])) {
-        var saveArr = new Array();
-        $('tr div[class*=checked]').each(function() {
-            //var rowId = $(this).parent().parent().attr("id");
-            var chatId = $(this).parents('tr').children().eq(4).find('input').val();
-            //추가로 체크한 app, 체크 취소한 app 구분
-            var rememberLen = initAppCheck.length;
-            for (var i=0; i<rememberLen; i++) {
-                if (chatId === initAppCheck[i].APP_ID) {
-                    initAppCheck.splice(i,1);
-                    break;
-                }
-            }
-            if (rememberLen === initAppCheck.length) {
-                saveArr.push(chatId);
-            }
-        });    
-        
-        var rowUser;			
-        var userId = $("#selectUserHiddenId").val();
-    
-        for (var i=0; i<$('#userTableBodyId').find('tr').length; i++) {
-            if ($('#userTableBodyId').find('tr').eq(i).children().eq(1).text() === userId) {
-                rowUser = i;
-                break;
+    var jsonData = JSON.stringify(saveArr);
+    var params = {
+        'saveArr': jsonData
+    };
+    $.ajax({
+        type: 'POST',
+        datatype: "JSON",
+        data: params,
+        url: '/user/updateUserAuth',
+        success: function (data) {
+            console.log(data);
+            if (data.status === 200) {
+                alert(language['REGIST_SUCC']);
+                window.location.reload();
+            } else {
+                alert(language['It_failed']);
             }
         }
-    
-        //save
-        var jsonsaveArr = JSON.stringify(saveArr);
-        var jsoninitAppCheck = JSON.stringify(initAppCheck);
-        var params = {
-            'userId' : userId,
-            'saveData' : jsonsaveArr,
-            'removeData' : jsoninitAppCheck,
-        };
-        $.ajax({
-            type: 'POST',
-            datatype: "JSON",
-            data: params,
-            url: '/users/updateUserAppList',
-            success: function(data) {
-                if (data.status === 200) {
-                    //window.location.reload();
-                    alert(language['REGIST_SUCC']);
-                    $('#userTableBodyId').find('tr').eq(rowUser).children().eq(1).trigger('click');
-                } else {
-                    alert(language['It_failed']);
-                }
-            }
-        });
-    }
-    
-
+    });
 }
-
 
 function iCheckBoxTrans() {
     $('input[type="checkbox"].minimal, input[type="radio"].minimal').iCheck({
         checkboxClass: 'icheckbox_minimal-blue',
-        radioClass   : 'iradio_minimal-blue'
+        radioClass: 'iradio_minimal-blue'
     })
     //Red color scheme for iCheck
     $('input[type="checkbox"].minimal-red, input[type="radio"].minimal-red').iCheck({
         checkboxClass: 'icheckbox_minimal-red',
-        radioClass   : 'iradio_minimal-red'
+        radioClass: 'iradio_minimal-red'
     })
     //Flat red color scheme for iCheck
     $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
         checkboxClass: 'icheckbox_flat-green',
-        radioClass   : 'iradio_flat-green'
+        radioClass: 'iradio_flat-green'
     })
 
     $('#check-all').iCheck({
         checkboxClass: 'icheckbox_flat-green',
-        radioClass   : 'iradio_flat-green'
-    }).on('ifChecked', function(event) {
+        radioClass: 'iradio_flat-green'
+    }).on('ifChecked', function (event) {
         $('input[name=tableCheckBox]').parent().iCheck('check');
-        
-    }).on('ifUnchecked', function() {
+
+    }).on('ifUnchecked', function () {
         $('input[name=tableCheckBox]').parent().iCheck('uncheck');
-        
+
     });
 }
 

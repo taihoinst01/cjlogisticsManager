@@ -1,4 +1,5 @@
 <!-- Left Menu Side -->
+<script type="text/javascript" src="/js/common/menuUserCheck.js"></script>
 <aside class="main-sidebar">
     <section class="sidebar">
         <input type="hidden" id="successHidden" value="<%= __('SUCCESS') %> "/>
@@ -130,6 +131,22 @@
                             </div>
                         </div>
                 </div>
+    </div>
+</div>
+
+<div class="modal fade" id="noPermissionModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel">TIIZ Manager</h4>
+            </div>
+            <div class="modal-body">
+                메뉴에 접근할 권한이 없습니다.
+            </div>
+            <div class="modal-footer" id="delete_footer_button">
+                    <button type="button" class="btn btn-primary" id="noPermission"><i class="fa fa-times"></i> Close</button> 
+            </div>
+        </div>
     </div>
 </div>
 

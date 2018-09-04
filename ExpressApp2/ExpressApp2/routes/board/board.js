@@ -610,5 +610,55 @@ function checkNull(val, newVal) {
     }
 }
 
+router.post('/getDashboardInfo', function (req, res) {
+    var userId = req.session.sid;
+    var QueryStr = "";
+    (async () => {
+        try {
+            if(userId=='admin'){
+                QueryStr = "SELECT BOARD_ID, BOARD_NM, BOARD_URL FROM TB_BOARD_I ";
+            }else{
+                QueryStr = "SELECT AA.BOARD_ID, AA.BOARD_NM, AA.BOARD_URL FROM ";
+                QueryStr += " TB_BOARD_I AA, TB_BOARD_RELATION BB";
+                QueryStr += " WHERE BB.USER_ID='"+userId+"' AND BB.BOARD_ID = AA.BOARD_ID";
+            }
+            
+
+            let pool = await dbConnect.getConnection(sql);
+            let result1 = await pool.request().query(QueryStr);
+
+            let rows = result1.recordset;
+
+            var recordList = [];
+            for (var i = 0; i < rows.length; i++) {
+                var item = {};
+                item = rows[i];
+                recordList.push(item);
+            }
+
+            if (rows.length > 0) {
+                res.send({
+                    records: recordList.length,
+                    rows: recordList
+                });
+
+            } else {
+                res.send({
+                    records: 0,
+                    rows: null
+                });
+            }
+        } catch (err) {
+            console.log(err)
+            // ... error checks
+        } finally {
+            sql.close();
+        }
+    })()
+
+    sql.on('error', err => {
+        // ... error handler
+    })
+});
 
 module.exports = router;

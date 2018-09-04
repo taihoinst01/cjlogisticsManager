@@ -36,7 +36,7 @@ router.post('/login', function (req, res) {
     */
     dbConnect.getConnection(sql).then(pool => {
     //new sql.ConnectionPool(dbConfig).connect().then(pool => {
-        return pool.request().query("SELECT USER_ID, SCRT_NUM FROM TB_USER_M WHERE USER_ID = '" + userId +"'")
+        return pool.request().query("SELECT USER_ID, SCRT_NUM, USER_AUTH FROM TB_USER_M WHERE USER_ID = '" + userId +"'")
         }).then(result => {
             let rows = result.recordset;
             console.log(rows);
@@ -51,6 +51,7 @@ router.post('/login', function (req, res) {
 
                 if(decipheredOutput == userPw) {
                     req.session.sid = req.body.mLoginId;
+                    req.session.sAuth = rows[0].USER_AUTH;
 
                     //subscription key 조회 start-----
                     dbConnect.getConnection(sql).then(pool => { 

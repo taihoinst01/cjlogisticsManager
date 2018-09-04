@@ -15,6 +15,11 @@ var users = require('./routes/users');
 var luis = require('./routes/luis/luis');
 var board = require('./routes/board/board');
 var learning = require('./routes/learning/learning');
+var code = require('./routes/code/code');
+var auth = require('./routes/auth/auth');
+var menu = require('./routes/menu/menu');
+var user = require('./routes/user/user');
+var boardMng = require('./routes/board/boardMng');
 
 var app = express();
 
@@ -156,6 +161,11 @@ app.use('/users', users);
 app.use('/luis', luis);
 app.use('/learning', learning);
 app.use('/board', board);
+app.use('/code', code);
+app.use('/auth', auth);
+app.use('/menu', menu);
+app.use('/user', user);
+app.use('/boardMng', boardMng);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
